@@ -1,9 +1,7 @@
 --[[    KINETIC UI
 
-    Author : Blissful#4492
+    Author : $ite
     Finish Date : 26/2/22
-    Documentation : https://blissfuls.world/kinetic/
-    GitRepo : https://github.com/Blissful4992/Kinetic
 
 ]]--
 
