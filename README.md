@@ -1,3 +1,2 @@
-# sitehub
+# dsc.gg/sitehub
 
-#dsc.gg/sitehub
