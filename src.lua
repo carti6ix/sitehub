@@ -1,2327 +1,1746 @@
---[[    SITEHUB UI
+if not game:IsLoaded() then
+	game.Loaded:wait() 
+end
 
-    Author : $ite
-    Finish Date : 26/2/22
-
-]]--
-
---
-local CLAMP = math.clamp
-local ROUND = math.round
-local HUGE = math.huge
-local RANDOM = math.random
-local FLOOR = math.floor
-local FMOD = math.fmod
-local SEED = math.randomseed
-local MAX = math.max
-local MIN = math.min
---
-local FIND = string.find
-local SUB = string.sub 
-local CHAR = string.char
-local LEN = string.len
-local WAIT = task.wait 
---
-local RGB = Color3.fromRGB
-local HSV = Color3.fromHSV
---
-local V2 = Vector2.new 
-local U2 = UDim2.new 
-local U1 = UDim.new
-local CF = CFrame.new
---
-local WRAP = coroutine.wrap
-local NEW = Instance.new
-local TBINSERT = table.insert
-local TBREMOVE = table.remove
-local TBFIND = table.find
---
-local COLOR_SEQUENCE = ColorSequence.new
-local COLOR_KEYPOINT = ColorSequenceKeypoint.new
---
-local TIME = os.time
-local TWEEN = TweenInfo.new
---
-local Players = game:GetService("Players")
-local Player = Players.LocalPlayer
-local Mouse = Player:GetMouse()
---
+local library = {}
+local request = request or http_request or (identifyexecutor() == "Synapse X" and syn.request) or (http and http.request)
+loadstring(request({Url="https://raw.githubusercontent.com/cypherdh/Script-Library/main/InstanceProtect",Method="GET"}).Body)()
 local UIS = game:GetService("UserInputService")
-local RS = game:GetService("RunService")
-local RStepped = RS.RenderStepped
 local TS = game:GetService("TweenService")
---
+function library:CreateWindow(name, version, icon)
+	name = name or "Name"
+	version = version or "Version"
+	icon = icon or math.random()
+	local MyGui = Instance.new("ScreenGui")
+	local Window = Instance.new("Frame")
+	local UICorner = Instance.new("UICorner")
+	local TitleBar = Instance.new("Frame")
+	local Icon = Instance.new("ImageLabel")
+	local MainTitle = Instance.new("TextLabel")
+	local TitleUnderline = Instance.new("Frame")
+	local UIGradient = Instance.new("UIGradient")
+	local Bar = Instance.new("Frame")
+	local Bar_2 = Instance.new("Frame")
+	local Close = Instance.new("ImageButton")
+	local Minimize = Instance.new("ImageButton")
+	local _4pxShadow2px_2 = Instance.new("ImageLabel")
 
-local charset = {}
+	local RandomString = ""
+	for i = 1, math.random(3,20) do
+		RandomString = RandomString..string.char(math.random(97,122))
+	end
+	ProtectInstance(MyGui)
+	ProtectInstance(Window)
 
-for i = 48,  57 do TBINSERT(charset, CHAR(i)) end
-for i = 65,  90 do TBINSERT(charset, CHAR(i)) end
-for i = 97, 122 do TBINSERT(charset, CHAR(i)) end
+	MyGui.Name = RandomString
+	MyGui.Parent = cloneref(game:GetService("CoreGui"))
+	MyGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-local function random_string(length)
-    SEED(TIME())
+	Window.Name = "Window"
+	Window.Parent = MyGui
+	Window.BackgroundColor3 = Color3.fromRGB(49, 49, 59)
+	Window.Position = UDim2.new(0.5, -300, 0.600000024, -200)
+	Window.Size = UDim2.new(0, 0, 0, 0)
+	Window.ClipsDescendants = true
 
-    if length > 0 then
-        return random_string(length - 1) .. charset[RANDOM(1, #charset)]
-    else
-        return ""
-    end
-end
+	UICorner.CornerRadius = UDim.new(0, 4)
+	UICorner.Parent = Window
 
---
+	TitleBar.Name = "TitleBar"
+	TitleBar.Parent = Window
+	TitleBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	TitleBar.BackgroundTransparency = 1.000
+	TitleBar.Size = UDim2.new(1, 0, 0, 30)
 
-local Library = {}
+	Icon.Name = "Icon"
+	Icon.Parent = TitleBar
+	Icon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	Icon.BackgroundTransparency = 1.000
+	Icon.Position = UDim2.new(0, 6, 0, 6)
+	Icon.Size = UDim2.new(0, 18, 0, 18)
+	Icon.Image = "rbxassetid://"..icon
+	Icon.ImageColor3 = Color3.fromRGB(135, 255, 135)
 
---
-local UI_Inset = game:GetService("GuiService"):GetGuiInset()
+	MainTitle.Name = "Title"
+	MainTitle.Parent = TitleBar
+	MainTitle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	MainTitle.BackgroundTransparency = 1.000
+	MainTitle.Position = UDim2.new(0, 30, 0, 1)
+	MainTitle.Size = UDim2.new(1, -30, 1, 0)
+	MainTitle.Font = Enum.Font.Gotham
+	MainTitle.Text = name.." | "..version --"Title | Version"
+	MainTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+	MainTitle.TextSize = 12.000
+	MainTitle.TextXAlignment = Enum.TextXAlignment.Left
 
--- Cached Enums
-local UIT = Enum.UserInputType
-local MB1 = UIT.MouseButton1
-local MB2 = UIT.MouseButton2
-local KBD = UIT.Keyboard
-local BSP = Enum.KeyCode.Backspace
-local DLT = Enum.KeyCode.Delete
+	TitleUnderline.Name = "TitleUnderline"
+	TitleUnderline.Parent = TitleBar
+	TitleUnderline.BackgroundColor3 = Color3.fromRGB(135, 255, 135)
+	TitleUnderline.BorderSizePixel = 0
+	TitleUnderline.Position = UDim2.new(0, 0, 1, 0)
+	TitleUnderline.Size = UDim2.new(1, 0, 0, 1)
 
-local GTHM = Enum.Font.Gotham
-local TXAL = Enum.TextXAlignment.Left
-local SOLO = Enum.SortOrder.LayoutOrder
+	UIGradient.Parent = TitleUnderline
 
-local EDO = Enum.EasingDirection.Out
-local ESS = Enum.EasingStyle.Sine
+	Bar.Name = "Bar"
+	Bar.Parent = TitleUnderline
+	Bar.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	Bar.BackgroundTransparency = 0.750
+	Bar.BorderSizePixel = 0
+	Bar.Position = UDim2.new(0, 6, 0, 0)
+	Bar.Size = UDim2.new(0, 18, 1, 0)
 
-local HorizontalSizeId    = 'rbxassetid://8943647369'
-local VerticalSizeId      = 'rbxassetid://8943646025'
-local DiagonalSizeId      = 'rbxassetid://9063724353'
+	Bar_2.Name = "Bar"
+	Bar_2.Parent = TitleUnderline
+	Bar_2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	Bar_2.BackgroundTransparency = 0.750
+	Bar_2.BorderSizePixel = 0
+	Bar_2.Position = UDim2.new(1, -24, 0, 0)
+	Bar_2.Size = UDim2.new(0, 18, 1, 0)
 
-local PlusIcon = "rbxassetid://7275743788"
-local MinIcon = "rbxassetid://7247993381"
+	Close.Name = "Close"
+	Close.Parent = TitleBar
+	Close.BackgroundTransparency = 1.000
+	Close.Position = UDim2.new(0.953333378, 0, 0.0666666627, 0)
+	Close.Size = UDim2.new(0, 25, 0, 25)
+	Close.ZIndex = 2
+	Close.Image = "rbxassetid://3926305904"
+	Close.ImageRectOffset = Vector2.new(284, 4)
+	Close.ImageRectSize = Vector2.new(24, 24)
 
-local ColorModule = {}
-function ColorModule:rgbToHsv(r, g, b)
-    r, g, b = r / 255, g / 255, b / 255
-    local max, min = MAX(r, g, b), MIN(r, g, b)
-    local h, s, v
-    v = max
+	Minimize.Name = "Minimize"
+	Minimize.Parent = TitleBar
+	Minimize.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	Minimize.BackgroundTransparency = 1.000
+	Minimize.Position = UDim2.new(0.953, -24, -0.2, 6)
+	Minimize.Size = UDim2.new(0, 26, 0, 30)
+	Minimize.Image = "http://www.roblox.com/asset/?id=6035067836"
 
-    local d = max - min
-    if max == 0 then
-        s = 0
-    else
-        s = d / max
-    end
+	_4pxShadow2px_2.Name = "4pxShadow(2px)"
+	_4pxShadow2px_2.Parent = Window
+	_4pxShadow2px_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	_4pxShadow2px_2.BackgroundTransparency = 1.000
+	_4pxShadow2px_2.Position = UDim2.new(0, -15, 0, -15)
+	_4pxShadow2px_2.Selectable = true
+	_4pxShadow2px_2.Size = UDim2.new(1, 30, 1, 30)
+	_4pxShadow2px_2.Image = "http://www.roblox.com/asset/?id=5761504593"
+	_4pxShadow2px_2.ImageColor3 = Color3.fromRGB(49, 49, 59)
+	_4pxShadow2px_2.ImageTransparency = 0.300
+	_4pxShadow2px_2.ScaleType = Enum.ScaleType.Slice
+	_4pxShadow2px_2.SliceCenter = Rect.new(17, 17, 283, 283)
 
-    if max == min then
-        h = 0
-    else
-        if max == r then
-            h = (g - b) / d
-            if g < b then
-                h = h + 6
-            end
-        elseif max == g then
-            h = (b - r) / d + 2
-        elseif max == b then
-            h = (r - g) / d + 4
-        end
-        h = h / 6
-    end
+	Close.MouseButton1Click:Connect(function()
+		TS:Create(Window, TweenInfo.new(0.5), {Size = UDim2.new(0, 600, 0, 0)}):Play()
+		repeat
+			wait()
+		until Window.Size == UDim2.new(0, 600, 0, 0)
+		wait(0.1)
+		TS:Create(Window, TweenInfo.new(0.5), {Size = UDim2.new(0, 0, 0, 0)}):Play()
+		repeat
+			wait()
+		until Window.Size == UDim2.new(0, 0, 0, 0)
+		MyGui:Remove()
+	end)
 
-    return h, s, v
-end
-
-function ColorModule:hsvToRgb(h, s, v)
-    local r, g, b
-
-    local i = FLOOR(h * 6);
-    local f = h * 6 - i;
-    local p = v * (1 - s);
-    local q = v * (1 - f * s);
-    local t = v * (1 - (1 - f) * s);
-
-    i = i % 6
-
-    if i == 0 then
-        r, g, b = v, t, p
-    elseif i == 1 then
-        r, g, b = q, v, p
-    elseif i == 2 then
-        r, g, b = p, v, t
-    elseif i == 3 then
-        r, g, b = p, q, v
-    elseif i == 4 then
-        r, g, b = t, p, v
-    elseif i == 5 then
-        r, g, b = v, p, q
-    end
-
-    return r * 255, g * 255, b * 255
-end
-
-function ColorModule:darkenColor(r, g, b, p)
-    local h, s, v = ColorModule:rgbToHsv(r, g, b)
-    v = p
-    local nr, ng, nb = ColorModule:hsvToRgb(h, s, v)
-    return RGB(nr, ng, nb)
-end
-
-local function MouseIn(obj)
-    if (Mouse.X < obj.AbsolutePosition.X or Mouse.X > obj.AbsolutePosition.X + obj.AbsoluteSize.X) or (Mouse.Y < obj.AbsolutePosition.Y or Mouse.Y > obj.AbsolutePosition.Y + obj.AbsoluteSize.Y) then
-        return false
-    end
-    return true
-end
-
-local function rgbToHex(rgb)
-    rgb = {rgb.R*255, rgb.G*255, rgb.B*255}
-	local hexadecimal = ''
-
-	for key, value in pairs(rgb) do
-		local hex = ''
-
-		while(value > 0)do
-			local index = FMOD(value, 16) + 1
-			value = FLOOR(value / 16)
-			hex = SUB('0123456789ABCDEF', index, index) .. hex			
+	Minimize.MouseButton1Click:Connect(function()
+		if not MinimizeGui then
+			MinimizeGui = true
+			if Window.Size == UDim2.new(0, 600,0, 400) then
+				TS:Create(Window, TweenInfo.new(0.25), {Size = UDim2.new(0, 600,0, 32)}):Play()
+				repeat wait() until Window.Size == UDim2.new(0, 600,0, 32)
+				if Page and Page.Visible == true then
+					Page.Visible = false
+				end
+				if Tabs and Tabs.Visible == true then
+					Tabs.Visible = false
+				end
+			end
+		else
+			MinimizeGui = false
+			if Window.Size == UDim2.new(0, 600,0, 32) then
+				if Page and Page.Visible == true then
+					Page.Visible = false
+				end
+				if Tabs and Tabs.Visible == true then
+					Tabs.Visible = false
+				end
+				TS:Create(Window, TweenInfo.new(0.25), {Size = UDim2.new(0, 600,0, 400)}):Play()
+			end
 		end
+	end)
 
-		if(LEN(hex) == 0)then
-			hex = '00'
 
-		elseif(LEN(hex) == 1)then
-			hex = '0' .. hex
+	function dragify(Frame)
+		dragToggle = nil
+		local dragSpeed = 0.25
+		dragInput = nil
+		dragStart = nil
+		local dragPos = nil
+		function updateInput(input)
+			local Delta = input.Position - dragStart
+			local Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + Delta.X, startPos.Y.Scale, startPos.Y.Offset + Delta.Y)
+			TS:Create(Frame, TweenInfo.new(0.25), {Position = Position}):Play()
 		end
-
-		hexadecimal = hexadecimal .. hex
+		Frame.InputBegan:Connect(function(input)
+			if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) and UIS:GetFocusedTextBox() == nil then
+				dragToggle = true
+				dragStart = input.Position
+				startPos = Frame.Position
+				input.Changed:Connect(function()
+					if input.UserInputState == Enum.UserInputState.End then
+						dragToggle = false
+					end
+				end)
+			end
+		end)
+		Frame.InputChanged:Connect(function(input)
+			if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+				dragInput = input
+			end
+		end)
+		game:GetService("UserInputService").InputChanged:Connect(function(input)
+			if input == dragInput and dragToggle then
+				updateInput(input)
+			end
+		end)
 	end
 
-	return "#"..hexadecimal
+	dragify(Window)
+	TS:Create(Window, TweenInfo.new(0.5), {Size = UDim2.new(0, 600, 0, 0)}):Play()
+	repeat wait() until Window.Size == UDim2.new(0, 600, 0, 0)
+	wait(0.1)
+	TS:Create(Window, TweenInfo.new(0.5), {Size = UDim2.new(0, 600, 0, 400)}):Play()
+
+	--end
+	local tabs = {}
+
+	function tabs:CreateTab(name)
+		name = name or "Section 1"
+		--Create Tab
+		local Tabs = Instance.new("Frame")
+		local UICorner_2 = Instance.new("UICorner")
+		local SectionLabel = Instance.new("TextLabel")
+		local UIListLayout = Instance.new("UIListLayout")
+		--local PageButton = Instance.new("TextButton") --LATER
+		local Indicator = Instance.new("Frame")
+
+		Tabs.Name = "Tabs"
+		Tabs.Parent = Window
+		Tabs.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
+		Tabs.Position = UDim2.new(0, 5, 0, 36)
+		Tabs.Size = UDim2.new(0, 140, 1, -41)
+
+		UICorner_2.CornerRadius = UDim.new(0, 4)
+		UICorner_2.Parent = Tabs
+
+		SectionLabel.Name = "SectionLabel"
+		SectionLabel.Parent = Tabs
+		SectionLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		SectionLabel.BackgroundTransparency = 1.000
+		SectionLabel.Position = UDim2.new(0, 7, 0, 0)
+		SectionLabel.Size = UDim2.new(1, -7, 0, 30)
+		SectionLabel.Font = Enum.Font.GothamBlack
+		SectionLabel.Text = name --"Section 1"
+		SectionLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		SectionLabel.TextSize = 12.000
+		SectionLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+		UIListLayout.Parent = Tabs
+		UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+		UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+		--LATER
+		--[[PageButton.Name = "PageButton"
+		PageButton.Parent = Tabs
+		PageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+		PageButton.BackgroundTransparency = 1.000
+		PageButton.Size = UDim2.new(1, -14, 0, 20)
+		PageButton.Font = Enum.Font.Gotham
+		PageButton.Text = "Page 1"
+		PageButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+		PageButton.TextSize = 12.000
+		PageButton.TextXAlignment = Enum.TextXAlignment.Left]]
+
+		Indicator.Name = "Indicator"
+		Indicator.Parent = Tabs
+		Indicator.BackgroundColor3 = Color3.fromRGB(135, 255, 135)
+		Indicator.BorderSizePixel = 0
+		Indicator.BackgroundTransparency = 1
+		Indicator.Position = UDim2.new(0, -14, 0, 4)
+		Indicator.Size = UDim2.new(0, 2, 1, -8)
+		Indicator.Visible = false
+		--end
+		local mytabbuttons = {}
+		function mytabbuttons:CreateFrame(name)
+			name = name or "Page 1"
+			--Creating Page
+
+			local Page = Instance.new("ScrollingFrame")
+			local UICorner_3 = Instance.new("UICorner")
+			local UIListLayout_2 = Instance.new("UIListLayout")
+			local UIPadding = Instance.new("UIPadding")
+			local SearchBar = Instance.new("Frame")
+			local UICorner_4 = Instance.new("UICorner")
+			local SearchIcon = Instance.new("ImageLabel")
+			local Bar_3 = Instance.new("Frame")
+			local SearchBox = Instance.new("TextBox")
+			local Section = Instance.new("Frame")
+			local UICorner_5 = Instance.new("UICorner")
+			local SectionContainer = Instance.new("Frame")
+
+			local Header = Instance.new("Frame")
+			local UICorner_23 = Instance.new("UICorner")
+			local UIGradient_2 = Instance.new("UIGradient")
+			local _4pxShadow2px_2 = Instance.new("ImageLabel")
+
+
+			Page.Name = "Page"
+			Page.Parent = Window
+			Page.Active = true
+			Page.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
+			Page.BorderColor3 = Color3.fromRGB(27, 42, 53)
+			Page.BorderSizePixel = 0
+			Page.Position = UDim2.new(0, 150, 0, 36)
+			Page.Size = UDim2.new(1, -155, 1, -41)
+			Page.ScrollBarThickness = 5
+			Page.ScrollBarImageColor3 = Color3.fromRGB(135, 255, 135)
+			Page.AutomaticCanvasSize = "Y"
+			Page.Visible = false
+
+			UICorner_3.CornerRadius = UDim.new(0, 4)
+			UICorner_3.Parent = Page
+
+			UIListLayout_2.Parent = Page
+			UIListLayout_2.HorizontalAlignment = Enum.HorizontalAlignment.Center
+			UIListLayout_2.SortOrder = Enum.SortOrder.LayoutOrder
+			UIListLayout_2.Padding = UDim.new(0, 4)
+
+			UIPadding.Parent = Page
+			UIPadding.PaddingBottom = UDim.new(0, 4)
+			UIPadding.PaddingLeft = UDim.new(0, 4)
+			UIPadding.PaddingRight = UDim.new(0, 4)
+			UIPadding.PaddingTop = UDim.new(0, 4)
+
+			SearchBar.Name = "SearchBar"
+			SearchBar.Parent = Page
+			SearchBar.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
+			SearchBar.Size = UDim2.new(1, 0, 0, 30)
+
+			UICorner_4.CornerRadius = UDim.new(0, 4)
+			UICorner_4.Parent = SearchBar
+
+			SearchIcon.Name = "SearchIcon"
+			SearchIcon.Parent = SearchBar
+			SearchIcon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			SearchIcon.BackgroundTransparency = 1.000
+			SearchIcon.Position = UDim2.new(0, 6, 0, 6)
+			SearchIcon.Size = UDim2.new(0, 18, 0, 18)
+			SearchIcon.Image = "rbxassetid://10045418551"
+			SearchIcon.ImageColor3 = Color3.fromRGB(135, 255, 135)
+
+			Bar_3.Name = "Bar"
+			Bar_3.Parent = SearchBar
+			Bar_3.BackgroundColor3 = Color3.fromRGB(135, 255, 135)
+			Bar_3.Position = UDim2.new(0, 30, 0, 10)
+			Bar_3.Size = UDim2.new(0, 1, 1, -20)
+
+			SearchBox.Name = "SearchBox"
+			SearchBox.Parent = SearchBar
+			SearchBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			SearchBox.BackgroundTransparency = 1.000
+			SearchBox.Position = UDim2.new(0, 40, 0, 1)
+			SearchBox.Size = UDim2.new(1, -40, 1, 0)
+			SearchBox.Font = Enum.Font.Gotham
+			SearchBox.PlaceholderColor3 = Color3.fromRGB(227, 225, 228)
+			SearchBox.PlaceholderText = "Search Here"
+			SearchBox.Text = ""
+			SearchBox.TextColor3 = Color3.fromRGB(227, 225, 228)
+			SearchBox.TextSize = 12.000
+			SearchBox.TextXAlignment = Enum.TextXAlignment.Left
+
+			Section.Name = "Section"
+			Section.Parent = Page
+			Section.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			Section.BackgroundTransparency = 1.000
+			Section.BorderSizePixel = 0
+			Section.Position = UDim2.new(0.0170000363, 0, 0.0968660116, 0)
+			Section.Size = UDim2.new(0.966000021, 0, 0.159766689, 117)
+
+			UICorner_5.CornerRadius = UDim.new(0, 4)
+			UICorner_5.Parent = Section
+
+			SectionContainer.Name = "SectionContainer"
+			SectionContainer.Parent = Section
+			SectionContainer.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
+			SectionContainer.BorderSizePixel = 0
+			SectionContainer.ClipsDescendants = true
+			SectionContainer.Position = UDim2.new(0, 0, 1.25310734e-07, 0)
+			SectionContainer.Size = UDim2.new(1, 0, 1.0033654, -1)
+			SectionContainer.ZIndex = 2
+
+			Header.Name = "Header"
+			Header.Parent = Section
+			Header.BackgroundColor3 = Color3.fromRGB(135, 255, 135)
+			Header.BorderSizePixel = 0
+			Header.Size = UDim2.new(1, 0, 0, 8)
+
+			UICorner_23.CornerRadius = UDim.new(0, 4)
+			UICorner_23.Parent = Header
+
+			UIGradient_2.Transparency = NumberSequence.new{NumberSequenceKeypoint.new(0.00, 0.75), NumberSequenceKeypoint.new(0.50, 0.00), NumberSequenceKeypoint.new(1.00, 0.75)}
+			UIGradient_2.Parent = Header
+
+			local UIPadding_2 = Instance.new("UIPadding")
+			local UIListLayout_3 = Instance.new("UIListLayout")
+			local UICorner_8 = Instance.new("UICorner")
+
+			UIPadding_2.Parent = SectionContainer
+			UIPadding_2.PaddingBottom = UDim.new(0, 4)
+			UIPadding_2.PaddingLeft = UDim.new(0, 4)
+			UIPadding_2.PaddingRight = UDim.new(0, 4)
+			UIPadding_2.PaddingTop = UDim.new(0, 4)
+
+			UIListLayout_3.Archivable = false
+			UIListLayout_3.Parent = SectionContainer
+			UIListLayout_3.HorizontalAlignment = Enum.HorizontalAlignment.Center
+			UIListLayout_3.SortOrder = Enum.SortOrder.LayoutOrder
+			UIListLayout_3.Padding = UDim.new(0, 4)
+
+			UICorner_8.CornerRadius = UDim.new(0, 4)
+			UICorner_8.Parent = SectionContainer
+			--End
+
+			function UpdateResults()
+				local search = string.lower(SearchBox.Text)
+				for i, v in	 pairs(SectionContainer:GetChildren()) do
+					if v:IsA("Frame") then
+						if search ~= "" then
+							if v.Name == "Button" then
+								local item = string.lower(v.Title.Text)
+								if string.find(item, search) then
+									v.Visible = true
+								else
+									v.Visible = false
+								end
+							elseif v.Name == "Label" then
+								local item = string.lower(v.LabelContent.Text)
+								if string.find(item, search) then
+									v.Visible = true
+								else
+									v.Visible = false
+								end
+							elseif v.Name == "Slider" then
+								local item = string.lower(v.Title.Text)
+								if string.find(item, search) then
+									v.Visible = true
+								else
+									v.Visible = false
+								end
+							elseif v.Name == "TextBox" then
+								local item = string.lower(v.Container.TextInput.Text)
+								if string.find(item, search) then
+									v.Visible = true
+								else
+									v.Visible = false
+								end
+							elseif v.Name == "Keybind" then
+								local item = string.lower(v.Container.Title.Text)
+								if string.find(item, search) then
+									v.Visible = true
+								else
+									v.Visible = false
+								end
+							elseif v.Name == "Toggle" then
+								local item = string.lower(v.Title.Text)
+								if string.find(item, search) then
+									v.Visible = true
+								else
+									v.Visible = false
+								end
+							end
+						else
+							v.Visible = true
+						end
+					end
+				end
+			end
+
+			SearchBox.Changed:Connect(UpdateResults)
+
+			local size = 0
+			SectionContainer.ChildAdded:Connect(function(me)
+				if me:IsA("Frame") and me.Name == "Toggle"  then
+					size = size + 43
+				elseif me:IsA("Frame") and me.Name == "Button" then
+					size = size + 43 
+				elseif me:IsA("Frame") and me.Name == "Label" then
+					size = size + 31  -- ADDING 1 TO MAKE SURE FRAME IS BIGGER
+				elseif me:IsA("Frame") and me.Name == "TextBox" then
+					size = size + 37
+				elseif me:IsA("Frame") and me.Name == "Keybind" then
+					size = size + 31
+				elseif me:IsA("Frame") and me.Name == "Slider" then
+					size = size + 47
+				elseif me:IsA("Frame") and me.Name == "ColorPicker" then
+					size = size + 47
+				end
+				Section.Size = UDim2.new(1,0,0,size)
+				--[[for i,v in pairs(SectionContainer:GetChildren()) do
+					if v:IsA("Frame") and v.Name == "Toggle" then
+						print(v.Name)
+						size = size + 46
+					elseif v:IsA("Frame") and v.Name == "Button" then
+						print(v.Name)
+						size = size + 46
+					elseif v:IsA("Frame") and v.Name == "Label" then
+						print(v.Name)
+						size = size + 46
+					elseif v:IsA("Frame") and v.Name == "Slider" then
+						print(v.Name)
+						size = size + 46
+					elseif v:IsA("Frame") and v.Name == "TextBox" then
+						print(v.Name)
+						size = size + 46
+					elseif v:IsA("Frame") and v.Name == "Keybind" then
+						print(v.Name)
+						size = size + 46
+					end
+					Section.Size = UDim2.new(1,0,0,size)
+				end]]
+			end)
+
+			local PageButton = Instance.new("TextButton")
+			PageButton.Name = "PageButton"
+			PageButton.Parent = Tabs
+			PageButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+			PageButton.BackgroundTransparency = 1.000
+			PageButton.Size = UDim2.new(1, -14, 0, 20)
+			PageButton.Font = Enum.Font.Gotham
+			PageButton.Text = name
+			PageButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+			PageButton.TextSize = 12.000
+			PageButton.TextTransparency = 0.5
+			PageButton.TextXAlignment = Enum.TextXAlignment.Left
+
+			PageButton.MouseButton1Down:Connect(function()
+				if Indicator.Visible == false then
+					Indicator.Visible = true
+				end
+				TS:Create(Indicator, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+				wait()
+				TS:Create(Indicator, TweenInfo.new(0.5), {BackgroundTransparency = 0}):Play()
+				for i, v in next, Tabs:GetChildren() do
+					if v:IsA("TextButton") and v.Name == "PageButton" then
+						TS:Create(v, TweenInfo.new(0.5), {TextTransparency = 0.5}):Play()
+					end
+				end
+				wait()
+				TS:Create(PageButton, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
+				Indicator.Parent = PageButton
+
+				for i,v in pairs(Window:GetChildren()) do
+					if v:IsA("ScrollingFrame") and v.Name ~= "Tabs" and v.Name ~= "TitleBar" and v.Name ~= "UICorner" then
+						v.Visible = false
+					end
+				end
+
+				Page.Visible = true
+			end)
+
+			local pagebuttons = {}
+
+			function pagebuttons:CreateButton(name, desc, callback)
+				name = name or "Button"
+				desc = desc or "Description"
+				callback = callback or function() end
+				local UpdateButton = {}
+				local Button = Instance.new("Frame")
+				local UICorner = Instance.new("UICorner")
+				local Title = Instance.new("TextLabel")
+				local Description = Instance.new("TextLabel")
+				local Caller = Instance.new("TextButton")
+				local Ripple = Instance.new('LocalScript')
+				local Sample = Instance.new("ImageLabel")
+
+				Button.Name = "Button"
+				Button.Parent = SectionContainer
+				Button.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
+				Button.Size = UDim2.new(1, 0, 0, 40)
+
+				UICorner.CornerRadius = UDim.new(0, 4)
+				UICorner.Parent = Button
+
+
+				Title.Name = "Title"
+				Title.Parent = Button
+				Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				Title.BackgroundTransparency = 1.000
+				Title.Position = UDim2.new(0, 7, 0, 1)
+				Title.Size = UDim2.new(1, -7, 0.5, 0)
+				Title.Font = Enum.Font.GothamBlack
+				Title.Text = name
+				Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+				Title.TextSize = 12.000
+				Title.TextXAlignment = Enum.TextXAlignment.Left
+
+				Description.Name = "Description"
+				Description.Parent = Button
+				Description.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				Description.BackgroundTransparency = 1.000
+				Description.Position = UDim2.new(0, 7, 0.5, -1)
+				Description.Size = UDim2.new(1, -7, 0.5, 0)
+				Description.Font = Enum.Font.Gotham
+				Description.Text = desc
+				Description.TextColor3 = Color3.fromRGB(159, 159, 159)
+				Description.TextSize = 12.000
+				Description.TextXAlignment = Enum.TextXAlignment.Left
+
+				Caller.Name = "Caller"
+				Caller.Parent = Button
+				Caller.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				Caller.BackgroundTransparency = 0.999
+				Caller.ClipsDescendants = true
+				Caller.Size = UDim2.new(0, 429, 0, 39)
+				Caller.Font = Enum.Font.SourceSans
+				Caller.Text = ""
+				Caller.TextColor3 = Color3.fromRGB(0, 0, 0)
+				Caller.TextSize = 14.000
+				Caller.TextTransparency = 1.000
+
+
+				Caller.MouseButton1Click:Connect(function()
+					callback()
+				end)
+
+				spawn(function()
+					local function QCZV_fake_script() -- Caller.Handler 
+						local Ripple = Instance.new('LocalScript', Caller)
+						local ms = game.Players.LocalPlayer:GetMouse()
+
+						Sample.Name = "Sample"
+						Sample.Parent = Ripple
+						Sample.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+						Sample.BackgroundTransparency = 1.000
+						Sample.Image = "http://www.roblox.com/asset/?id=4560909609"
+						Sample.ImageColor3 = Color3.fromRGB(135, 255, 135)
+						Sample.ImageTransparency = 0.600
+
+						local btn = Caller
+						local sample = Sample
+
+						btn.MouseButton1Click:Connect(function()
+							local c = sample:Clone()
+							c.Parent = btn
+							local x, y = (ms.X - c.AbsolutePosition.X), (ms.Y - c.AbsolutePosition.Y)
+							c.Position = UDim2.new(0, x, 0, y)
+							local len, size = 0.35, nil
+							if btn.AbsoluteSize.X >= btn.AbsoluteSize.Y then
+								size = (btn.AbsoluteSize.X * 1.5)
+							else
+								size = (btn.AbsoluteSize.Y * 1.5)
+							end
+							c:TweenSizeAndPosition(UDim2.new(0, size, 0, size), UDim2.new(0.5, (-size / 2), 0.5, (-size / 2)), 'Out', 'Quad', len, true, nil)
+							for i = 1, 10 do
+								c.ImageTransparency = c.ImageTransparency + 0.05
+								wait(len / 12)
+							end
+							c:Destroy()
+						end)
+					end
+					coroutine.wrap(QCZV_fake_script)()
+				end)
+
+				function UpdateButton:UpdateButton(name)
+					ButtonText.Text = name
+				end
+				return UpdateButton
+			end
+
+			function pagebuttons:CreateLabel(name)
+				name = name or "Label"
+				local UpdateLabel2 = {}
+				local Label = Instance.new("Frame")
+				local UICorner_16 = Instance.new("UICorner")
+				local _4pxShadow2px = Instance.new("ImageLabel")
+				local LabelContent = Instance.new("TextLabel")
+
+
+				Label.Name = "Label"
+				Label.Parent = SectionContainer
+				Label.BackgroundColor3 = Color3.fromRGB(135, 255, 135)
+				Label.BackgroundTransparency = 0.500
+				Label.Size = UDim2.new(1, 0, 0, 24)
+
+				UICorner_16.CornerRadius = UDim.new(0, 4)
+				UICorner_16.Parent = Label
+
+				_4pxShadow2px.Name = "4pxShadow(2px)"
+				_4pxShadow2px.Parent = Label
+				_4pxShadow2px.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				_4pxShadow2px.BackgroundTransparency = 1.000
+				_4pxShadow2px.Position = UDim2.new(0, -15, 0, -15)
+				_4pxShadow2px.Selectable = true
+				_4pxShadow2px.Size = UDim2.new(1, 30, 1, 30)
+				_4pxShadow2px.Image = "http://www.roblox.com/asset/?id=5761504593"
+				_4pxShadow2px.ImageColor3 = Color3.fromRGB(135, 255, 135)
+				_4pxShadow2px.ImageTransparency = 0.700
+				_4pxShadow2px.ScaleType = Enum.ScaleType.Slice
+				_4pxShadow2px.SliceCenter = Rect.new(17, 17, 283, 283)
+
+				LabelContent.Name = "LabelContent"
+				LabelContent.Parent = Label
+				LabelContent.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				LabelContent.BackgroundTransparency = 1.000
+				LabelContent.Position = UDim2.new(0, 7, 0, 0)
+				LabelContent.Size = UDim2.new(1, -7, 1, 0)
+				LabelContent.Font = Enum.Font.Gotham
+				LabelContent.TextColor3 = Color3.fromRGB(255, 255, 255)
+				LabelContent.Text = name
+				LabelContent.TextSize = 12.000
+				LabelContent.TextXAlignment = Enum.TextXAlignment.Left
+				function UpdateLabel2:UpdateLabel(name)
+					LabelContent.Text = name
+				end
+				return UpdateLabel2
+			end
+
+			function pagebuttons:CreateSlider(name,min,max,callback)
+				name = name or "Slider"
+				min = min or 16
+				max = max or 100
+				local library4 = {}
+				library4["Value"] = nil
+				local Slider = Instance.new("Frame")
+				local UICorner_17 = Instance.new("UICorner")
+				local Title_4 = Instance.new("TextLabel")
+				local Tracker = Instance.new("Frame")
+				local Indicator_3 = Instance.new("Frame")
+				local TextButton_2 = Instance.new("TextButton")
+				local UICorner_18 = Instance.new("UICorner")
+				local Fade = Instance.new("Frame")
+				local UICorner_19 = Instance.new("UICorner")
+				local Value = Instance.new("Frame")
+				local UICorner_20 = Instance.new("UICorner")
+				local ValueText = Instance.new("TextLabel")
+				local Shadow_1 = Instance.new("ImageLabel")
+				local Shadow_2 = Instance.new("ImageLabel")
+
+				Slider.Name = "Slider"
+				Slider.Parent = SectionContainer
+				Slider.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
+				Slider.Size = UDim2.new(1, 0, 0, 40)
+
+				UICorner_17.CornerRadius = UDim.new(0, 4)
+				UICorner_17.Parent = Slider
+
+				Title_4.Name = "Title"
+				Title_4.Parent = Slider
+				Title_4.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				Title_4.BackgroundTransparency = 1.000
+				Title_4.Position = UDim2.new(0, 7, 0, 0)
+				Title_4.Size = UDim2.new(1, -7, 0, 30)
+				Title_4.Font = Enum.Font.GothamBlack
+				Title_4.Text = name
+				Title_4.TextColor3 = Color3.fromRGB(255, 255, 255)
+				Title_4.TextSize = 12.000
+				Title_4.TextXAlignment = Enum.TextXAlignment.Left
+
+				Tracker.Name = "Tracker"
+				Tracker.Parent = Slider
+				Tracker.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
+				Tracker.BorderSizePixel = 0
+				Tracker.Position = UDim2.new(0, 7, 1, -10)
+				Tracker.Size = UDim2.new(1, -14, 0, 2)
+
+				Indicator_3.Name = "Indicator"
+				Indicator_3.Parent = Tracker
+				Indicator_3.BackgroundColor3 = Color3.fromRGB(135, 255, 135)
+				Indicator_3.BorderSizePixel = 0
+				Indicator_3.Size = UDim2.new(0, 0, 1, 0)
+
+				Shadow_1.Name = "Shadow_1"
+				Shadow_1.Parent = Indicator_3
+				Shadow_1.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				Shadow_1.BackgroundTransparency = 1.000
+				Shadow_1.Position = UDim2.new(0, -15, 0, -15)
+				Shadow_1.Selectable = true
+				Shadow_1.Size = UDim2.new(1, 30, 1, 30)
+				Shadow_1.Image = "http://www.roblox.com/asset/?id=5761504593"
+				Shadow_1.ImageColor3 = Color3.fromRGB(135, 255, 135)
+				Shadow_1.ImageTransparency = 1
+				Shadow_1.ScaleType = Enum.ScaleType.Slice
+				Shadow_1.SliceCenter = Rect.new(17, 17, 283, 283)
+
+				TextButton_2.Parent = Indicator_3
+				TextButton_2.BackgroundColor3 = Color3.fromRGB(135, 255, 135)
+				TextButton_2.Position = UDim2.new(1, -4, 0.5, -4)
+				TextButton_2.Size = UDim2.new(0, 8, 0, 8)
+				TextButton_2.Font = Enum.Font.SourceSans
+				TextButton_2.Text = ""
+				TextButton_2.TextColor3 = Color3.fromRGB(0, 0, 0)
+				TextButton_2.TextSize = 14.000
+
+				Shadow_2.Name = "Shadow_2"
+				Shadow_2.Parent = TextButton_2
+				Shadow_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				Shadow_2.BackgroundTransparency = 1.000
+				Shadow_2.Position = UDim2.new(0, -15, 0, -15)
+				Shadow_2.Selectable = true
+				Shadow_2.Size = UDim2.new(1, 30, 1, 30)
+				Shadow_2.Image = "http://www.roblox.com/asset/?id=5761504593"
+				Shadow_2.ImageColor3 = Color3.fromRGB(135, 255, 135)
+				Shadow_2.ImageTransparency = 1
+				Shadow_2.ScaleType = Enum.ScaleType.Slice
+				Shadow_2.SliceCenter = Rect.new(17, 17, 283, 283)
+
+				UICorner_18.CornerRadius = UDim.new(0.5, 0)
+				UICorner_18.Parent = TextButton_2
+
+				Fade.Name = "Fade"
+				Fade.Parent = TextButton_2
+				Fade.BackgroundColor3 = Color3.fromRGB(135, 255, 135)
+				Fade.BackgroundTransparency = 1.000
+				Fade.Position = UDim2.new(-0.5, 0, -0.5, 0)
+				Fade.Size = UDim2.new(2, 0, 2, 0)
+
+				UICorner_19.CornerRadius = UDim.new(0.5, 0)
+				UICorner_19.Parent = Fade
+
+				Value.Name = "Value"
+				Value.Parent = Slider
+				Value.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+				Value.BackgroundTransparency = 0.830
+				Value.Position = UDim2.new(1, -47, 0, 4)
+				Value.Size = UDim2.new(0, 43, 0, 22)
+
+				UICorner_20.CornerRadius = UDim.new(0, 4)
+				UICorner_20.Parent = Value
+
+				ValueText.Name = "ValueText"
+				ValueText.Parent = Value
+				ValueText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				ValueText.BackgroundTransparency = 1.000
+				ValueText.BorderColor3 = Color3.fromRGB(27, 42, 53)
+				ValueText.Size = UDim2.new(1, 0, 1, 0)
+				ValueText.Font = Enum.Font.Gotham
+				ValueText.Text = min
+				ValueText.TextColor3 = Color3.fromRGB(227, 225, 228)
+				ValueText.TextSize = 12.000
+
+
+
+				local value
+				local dragging
+				local SliderBar = Tracker
+				local Sliderbutton = TextButton_2
+				local Slider_2 = Indicator_3
+				local mr = math.round
+				function library4:SetValue(input)
+					local pos = UDim2.new(math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1), 0, 0, (SliderBar.AbsoluteSize.Y))
+					Slider_2:TweenSize(pos, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+					local value = math.floor(( ((pos.X.Scale * max) / max) * (max - min) + min ) * 100) / 100
+					ValueText.Text = tostring(mr(value))
+					library4["Value"] = value
+					spawn(function() callback(value) wait() ValueText.Text = mr(value) end)
+				end;
+
+				Sliderbutton.InputBegan:Connect(function(input)
+					if input.UserInputType == Enum.UserInputType.MouseButton1 then
+						dragging = true
+						TS:Create(Fade,TweenInfo.new(.1),{BackgroundTransparency=0.8}):Play()
+						TS:Create(Shadow_1,TweenInfo.new(.1),{ImageTransparency=0.7}):Play()
+						TS:Create(Shadow_2,TweenInfo.new(.1),{ImageTransparency=0.7}):Play()
+					end
+				end)
+
+				Sliderbutton.InputEnded:Connect(function(input)
+					if input.UserInputType == Enum.UserInputType.MouseButton1 then
+						dragging = false
+						TS:Create(Fade,TweenInfo.new(.1),{BackgroundTransparency=1}):Play()
+						TS:Create(Shadow_1,TweenInfo.new(.1),{ImageTransparency=1}):Play()
+						TS:Create(Shadow_2,TweenInfo.new(.1),{ImageTransparency=1}):Play()
+					end
+				end)
+
+				Sliderbutton.InputBegan:Connect(function(input)
+					if input.UserInputType == Enum.UserInputType.MouseButton1 then
+						library4:SetValue(input)
+					end
+				end)
+
+				game:GetService("UserInputService").InputChanged:Connect(function(input)
+					if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+						library4:SetValue(input)
+					end
+				end)
+				return library4	
+			end
+
+			function pagebuttons:CreateBox(name, icon, callback)
+				name = name or "Input Text Here..."
+				if icon == "Default" then
+					icon = 10045753138
+				else
+					icon = icon
+				end
+				callback = callback or function() end
+				local UpdateBox = {}
+				local TextBox = Instance.new("Frame")
+				local Footer_3 = Instance.new("Frame")
+				local UICorner_21 = Instance.new("UICorner")
+				local Container_3 = Instance.new("Frame")
+				local UICorner_22 = Instance.new("UICorner")
+				local TextInput = Instance.new("TextBox")
+				local EditIcon = Instance.new("ImageLabel")
+
+				TextBox.Name = "TextBox"
+				TextBox.Parent = SectionContainer
+				TextBox.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				TextBox.BackgroundTransparency = 1.000
+				TextBox.Size = UDim2.new(1, 0, 0, 30)
+
+				Footer_3.Name = "Footer"
+				Footer_3.Parent = TextBox
+				Footer_3.BackgroundColor3 = Color3.fromRGB(135, 255, 135)
+				Footer_3.BackgroundTransparency = 0.750
+				Footer_3.Position = UDim2.new(0, 0, 1, -8)
+				Footer_3.Size = UDim2.new(1, 0, 0, 8)
+
+				UICorner_21.CornerRadius = UDim.new(0, 4)
+				UICorner_21.Parent = Footer_3
+
+				Container_3.Name = "Container"
+				Container_3.Parent = TextBox
+				Container_3.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
+				Container_3.BorderSizePixel = 0
+				Container_3.Size = UDim2.new(1, 0, 1, -1)
+				Container_3.ZIndex = 2
+
+				UICorner_22.CornerRadius = UDim.new(0, 4)
+				UICorner_22.Parent = Container_3
+
+				TextInput.Name = "TextInput"
+				TextInput.Parent = Container_3
+				TextInput.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				TextInput.BackgroundTransparency = 1.000
+				TextInput.Position = UDim2.new(0, 30, 0, 0)
+				TextInput.Size = UDim2.new(1, -30, 1, 0)
+				TextInput.Font = Enum.Font.Gotham
+				TextInput.PlaceholderColor3 = Color3.fromRGB(255, 255, 255)
+				TextInput.PlaceholderText = name --"Input Text Here..."
+				TextInput.Text = ""
+				TextInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+				TextInput.TextSize = 12.000
+				TextInput.TextXAlignment = Enum.TextXAlignment.Left
+
+
+				TextInput.FocusLost:Connect(function()
+					callback(TextInput.Text)
+				end)
+
+
+				EditIcon.Name = "EditIcon"
+				EditIcon.Parent = Container_3
+				EditIcon.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				EditIcon.BackgroundTransparency = 1.000
+				EditIcon.Position = UDim2.new(0, 6, 0, 6)
+				EditIcon.Size = UDim2.new(0, 18, 0, 18)
+				EditIcon.Image = "rbxassetid://"..icon
+				EditIcon.ImageColor3 = Color3.fromRGB(135, 255, 135)
+				function UpdateBox:UpdateBox(name)
+					TextInput.PlaceholderText = name
+				end
+				return UpdateBox
+			end
+
+			function pagebuttons:CreateBind(name, defaultkey, callback)
+				local name = name or "Keybind"
+				local defaultkey = defaultkey or "Unknown"
+				local callback = callback or function() end
+				local UpdateBind = {}
+				local Keybind = Instance.new("Frame")
+				local Footer_2 = Instance.new("Frame")
+				local UICorner_13 = Instance.new("UICorner")
+				local Container_2 = Instance.new("Frame")
+				local UICorner_14 = Instance.new("UICorner")
+				local Title_3 = Instance.new("TextLabel")
+				local KButton = Instance.new("TextButton")
+				local Sample = Instance.new("ImageLabel")
+				local UICorner_15 = Instance.new("UICorner")
+
+				Keybind.Name = "Keybind"
+				Keybind.Parent = SectionContainer
+				Keybind.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				Keybind.BackgroundTransparency = 1.000
+				Keybind.Size = UDim2.new(1, 0, 0, 30)
+
+				Footer_2.Name = "Footer"
+				Footer_2.Parent = Keybind
+				Footer_2.BackgroundColor3 = Color3.fromRGB(135, 255, 135)
+				Footer_2.BackgroundTransparency = 0.750
+				Footer_2.Position = UDim2.new(0, 0, 1, -8)
+				Footer_2.Size = UDim2.new(1, 0, 0, 8)
+
+				UICorner_13.CornerRadius = UDim.new(0, 4)
+				UICorner_13.Parent = Footer_2
+
+				Container_2.Name = "Container"
+				Container_2.Parent = Keybind
+				Container_2.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
+				Container_2.BorderSizePixel = 0
+				Container_2.Size = UDim2.new(1, 0, 1, -1)
+				Container_2.ZIndex = 2
+
+				UICorner_14.CornerRadius = UDim.new(0, 4)
+				UICorner_14.Parent = Container_2
+
+				Title_3.Name = "Title"
+				Title_3.Parent = Container_2
+				Title_3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				Title_3.BackgroundTransparency = 1.000
+				Title_3.Position = UDim2.new(0.0169024151, 0, 0, 0)
+				Title_3.Size = UDim2.new(0, 55, 0, 29)
+				Title_3.Font = Enum.Font.GothamBlack
+				Title_3.Text = name
+				Title_3.TextColor3 = Color3.fromRGB(255, 255, 255)
+				Title_3.TextSize = 12.000
+				Title_3.TextXAlignment = Enum.TextXAlignment.Left
+
+				KButton.Name = "KButton"
+				KButton.Parent = Container_2
+				KButton.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+				KButton.BackgroundTransparency = 0.830
+				KButton.Position = UDim2.new(0.814999998, 0, 0.129999995, 0)
+				KButton.Size = UDim2.new(0, 72, 0, 22)
+				KButton.Font = Enum.Font.Gotham
+				KButton.ClipsDescendants = true
+				KButton.Text = defaultkey
+				KButton.TextColor3 = Color3.fromRGB(227, 225, 228)
+				KButton.TextSize = 12.000
+
+				Sample.Name = "Sample"
+				Sample.Parent = Ripple
+				Sample.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				Sample.BackgroundTransparency = 1.000
+				Sample.Image = "http://www.roblox.com/asset/?id=4560909609"
+				Sample.ImageColor3 = Color3.fromRGB(135, 255, 135)
+				Sample.ImageTransparency = 0.600
+
+				UICorner_15.CornerRadius = UDim.new(0, 4)
+				UICorner_15.Parent = KButton
+
+				local keybindtoggle = false
+				KButton.MouseButton1Click:Connect(function()
+					if keybindtoggle == false then
+						keybindtoggle = true
+						KButton.Text = ". . ."
+						Thing = game:GetService("UserInputService").InputBegan:Connect(function(Key, IsNotFocused)
+							if IsNotFocused then return end
+							if Key.UserInputType == Enum.UserInputType.Keyboard then
+								KButton.Text = Key.KeyCode.Name
+								callback(Key.KeyCode.Name)
+								CurrentKey = Key.KeyCode.Name
+								keybindtoggle = false
+								Thing:Disconnect()
+							else
+								KButton.Text = "Unknown"
+								Thing:Disconnect()
+							end
+						end)
+					else
+						keybindtoggle = false
+					end
+				end)
+
+				game:GetService("UserInputService").InputBegan:Connect(function(Key, IsNotFocused)
+					if IsNotFocused then return end
+					if Key.UserInputType == Enum.UserInputType.Keyboard and Key.KeyCode.Name == CurrentKey then
+						local btn = KButton
+						local sample = Sample
+						local c = sample:Clone()
+						c.Parent = btn
+						c.Position = UDim2.new(btn.Position)
+						local len, size = 0.35, nil
+						if btn.AbsoluteSize.X >= btn.AbsoluteSize.Y then
+							size = (btn.AbsoluteSize.X * 1.5)
+						else
+							size = (btn.AbsoluteSize.Y * 1.5)
+						end
+						c:TweenSizeAndPosition(UDim2.new(0, size, 0, size), UDim2.new(0.5, (-size / 2), 0.5, (-size / 2)), 'Out', 'Quad', len, true, nil)
+						for i = 1, 10 do
+							c.ImageTransparency = c.ImageTransparency + 0.05
+							wait(len / 12)
+						end
+						c:Destroy()
+					end
+				end)
+
+				KButton.Text = defaultkey
+
+				function UpdateBind:UpdateBind(name)
+					Title_3.Text = name
+				end
+				return UpdateBind
+			end
+
+			function pagebuttons:CreateToggle(title , desc, callback)
+				title = title or "Title"
+				desc = desc or "Description"
+				callback = callback or function() end
+				local UpdateToggle = {}
+				local Toggle = Instance.new("Frame")
+				local UICorner = Instance.new("UICorner")
+				local ToggleTitle = Instance.new("TextLabel")
+				local Description = Instance.new("TextLabel")
+				local Indicator = Instance.new("Frame")
+				local UIStroke = Instance.new("UIStroke")
+				local Dot = Instance.new("Frame")
+				local UICorner_2 = Instance.new("UICorner")
+				local UICorner_3 = Instance.new("UICorner")
+				local TButton = Instance.new("TextButton")
+				local UICorner_4 = Instance.new("UICorner")
+
+				Toggle.Name = "Toggle"
+				Toggle.Parent = SectionContainer
+				Toggle.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
+				Toggle.Size = UDim2.new(1, 0, 0, 40)
+
+				UICorner.CornerRadius = UDim.new(0, 4)
+				UICorner.Parent = Toggle
+
+				ToggleTitle.Name = "Title"
+				ToggleTitle.Parent = Toggle
+				ToggleTitle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				ToggleTitle.BackgroundTransparency = 1.000
+				ToggleTitle.Position = UDim2.new(0, 7, 0, 1)
+				ToggleTitle.Size = UDim2.new(1, -7, 0.5, 0)
+				ToggleTitle.Font = Enum.Font.GothamBlack
+				ToggleTitle.Text = title
+				ToggleTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+				ToggleTitle.TextSize = 12.000
+				ToggleTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+				Description.Name = "Description"
+				Description.Parent = Toggle
+				Description.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				Description.BackgroundTransparency = 1.000
+				Description.Position = UDim2.new(0, 7, 0.5, -1)
+				Description.Size = UDim2.new(1, -7, 0.5, 0)
+				Description.Font = Enum.Font.Gotham
+				Description.Text = desc
+				Description.TextColor3 = Color3.fromRGB(159, 159, 159)
+				Description.TextSize = 12.000
+				Description.TextXAlignment = Enum.TextXAlignment.Left
+
+				Indicator.Name = "Indicator"
+				Indicator.Parent = Toggle
+				Indicator.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				Indicator.BackgroundTransparency = 1.000
+				Indicator.Position = UDim2.new(1, -29, 0, 11)
+				Indicator.Size = UDim2.new(0, 18, 0, 18)
+
+				UIStroke.Name = "UIStroke"
+				UIStroke.Parent = Indicator
+				UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+				UIStroke.Color = Color3.fromRGB(135, 255, 135)
+				UIStroke.LineJoinMode = Enum.LineJoinMode.Round
+				UIStroke.Thickness = 2
+				UIStroke.Transparency = 0
+
+				Dot.Name = "Dot"
+				Dot.Parent = Indicator
+				Dot.BackgroundColor3 = Color3.fromRGB(135, 255, 135)
+				Dot.BackgroundTransparency = 1.000
+				Dot.Position = UDim2.new(0, 2, 0, 2)
+				Dot.Size = UDim2.new(1, -4, 1, -4)
+
+				UICorner_2.CornerRadius = UDim.new(0.5, 0)
+				UICorner_2.Parent = Dot
+
+				UICorner_3.CornerRadius = UDim.new(0.5, 0)
+				UICorner_3.Parent = Indicator
+
+				TButton.Name = "TButton"
+				TButton.Parent = Toggle
+				TButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				TButton.BackgroundTransparency = 0.990
+				TButton.Position = UDim2.new(0.919974327, 0, 0.174999997, 0)
+				TButton.Size = UDim2.new(0, 25, 0, 26)
+				TButton.Font = Enum.Font.SourceSans
+				TButton.Text = ""
+				TButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+				TButton.TextSize = 14.000
+
+				UICorner_4.CornerRadius = UDim.new(0.5, 0)
+				UICorner_4.Parent = TButton
+
+				TButton.MouseButton1Click:Connect(function()
+					if not f then
+						f = true
+						TS:Create(Dot,TweenInfo.new(.1),{BackgroundTransparency=0}):Play()
+						callback(true)
+					else
+						f = false
+						TS:Create(Dot,TweenInfo.new(.1),{BackgroundTransparency=1}):Play()
+						callback(false)
+					end
+				end)
+				function UpdateToggle:UpdateToggle(title, desc)
+					ToggleTitle.Text = title
+					Description.Text = desc
+				end
+				return UpdateToggle
+			end
+
+
+			function pagebuttons:CreateColorPicker(name, callback)
+				-- Very Buggy
+				name = name or "ColorPicker"
+				callback = callback or function() end
+				local ColorPicker = Instance.new("Frame")
+				local UICorner = Instance.new("UICorner")
+				local Title = Instance.new("TextLabel")
+				local ColourGradientFrame = Instance.new("TextButton")
+				local UICorner_2 = Instance.new("UICorner")
+				local ColourGradient = Instance.new("UIGradient")
+				local Slider = Instance.new("TextButton")
+				local UICorner_3 = Instance.new("UICorner")
+				local ColourPreview = Instance.new("Frame")
+				local DarknessGradientFrame = Instance.new("TextButton")
+				local Slider_2 = Instance.new("TextButton")
+				local DarknessGradient = Instance.new("UIGradient")
+				local Value2 = Instance.new("Frame")
+				local UICorner_4 = Instance.new("UICorner")
+				local ValueText2 = Instance.new("TextLabel")
+
+				ColorPicker.Name = "ColorPicker"
+				ColorPicker.Parent = SectionContainer
+				ColorPicker.BackgroundColor3 = Color3.fromRGB(40, 40, 48)
+				ColorPicker.Size = UDim2.new(1, 0, 0, 40)
+
+				UICorner.CornerRadius = UDim.new(0, 4)
+				UICorner.Parent = ColorPicker
+
+				Title.Name = "Title"
+				Title.Parent = ColorPicker
+				Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				Title.BackgroundTransparency = 1.000
+				Title.Position = UDim2.new(0, 7, 0, 0)
+				Title.Size = UDim2.new(1, -7, 0, 30)
+				Title.Font = Enum.Font.GothamBlack
+				Title.Text = name
+				Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+				Title.TextSize = 12.000
+				Title.TextXAlignment = Enum.TextXAlignment.Left
+
+				ColourGradientFrame.Name = "ColourGradientFrame"
+				ColourGradientFrame.Parent = ColorPicker
+				ColourGradientFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				ColourGradientFrame.BorderSizePixel = 0
+				ColourGradientFrame.Position = UDim2.new(0.0170000009, 0, 0.699999988, 0)
+				ColourGradientFrame.Size = UDim2.new(0, 403, 0, 8)
+				ColourGradientFrame.AutoButtonColor = false
+				ColourGradientFrame.Font = Enum.Font.SourceSans
+				ColourGradientFrame.Text = ""
+				ColourGradientFrame.TextColor3 = Color3.fromRGB(0, 0, 0)
+				ColourGradientFrame.TextSize = 14.000
+
+				UICorner_2.CornerRadius = UDim.new(0, 9)
+				UICorner_2.Parent = ColourGradientFrame
+
+				ColourGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 4)), ColorSequenceKeypoint.new(0.20, Color3.fromRGB(255, 255, 0)), ColorSequenceKeypoint.new(0.40, Color3.fromRGB(0, 255, 0)), ColorSequenceKeypoint.new(0.60, Color3.fromRGB(0, 255, 255)), ColorSequenceKeypoint.new(0.80, Color3.fromRGB(0, 0, 255)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 255))}
+				ColourGradient.Name = "ColourGradient"
+				ColourGradient.Parent = ColourGradientFrame
+
+				Slider.Name = "Slider"
+				Slider.Parent = ColourGradientFrame
+				Slider.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				Slider.Size = UDim2.new(0, 4, 0, 8)
+				Slider.Font = Enum.Font.SourceSans
+				Slider.Text = ""
+				Slider.TextColor3 = Color3.fromRGB(0, 0, 0)
+				Slider.TextSize = 14.000
+
+				UICorner_3.CornerRadius = UDim.new(5, 9)
+				UICorner_3.Parent = Slider
+
+				ColourPreview.Name = "ColourPreview"
+				ColourPreview.Parent = ColorPicker
+				ColourPreview.BackgroundColor3 = Color3.fromRGB(255, 0, 4)
+				ColourPreview.BorderSizePixel = 0
+				ColourPreview.Position = UDim2.new(-0.0155634917, 0, 0.651912689, 0)
+				ColourPreview.Size = UDim2.new(0.00590497162, 0, 0.0980872661, 0)
+				ColourPreview.Visible = false
+
+				DarknessGradientFrame.Name = "DarknessGradientFrame"
+				DarknessGradientFrame.Parent = ColorPicker
+				DarknessGradientFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				DarknessGradientFrame.BorderSizePixel = 0
+				DarknessGradientFrame.Position = UDim2.new(0.947692037, 0, 0.803900123, 0)
+				DarknessGradientFrame.Size = UDim2.new(0.00933223031, 0, 0.0797876194, 0)
+				DarknessGradientFrame.Visible = false
+				DarknessGradientFrame.AutoButtonColor = false
+				DarknessGradientFrame.Font = Enum.Font.SourceSans
+				DarknessGradientFrame.Text = ""
+				DarknessGradientFrame.TextColor3 = Color3.fromRGB(0, 0, 0)
+				DarknessGradientFrame.TextSize = 14.000
+
+				Slider_2.Name = "Slider"
+				Slider_2.Parent = DarknessGradientFrame
+				Slider_2.BackgroundColor3 = Color3.fromRGB(255, 149, 0)
+				Slider_2.BorderSizePixel = 0
+				Slider_2.Size = UDim2.new(0.00300000003, 0, 1, 0)
+				Slider_2.AutoButtonColor = false
+				Slider_2.Font = Enum.Font.SourceSans
+				Slider_2.Text = ""
+				Slider_2.TextColor3 = Color3.fromRGB(0, 0, 0)
+				Slider_2.TextSize = 14.000
+
+				DarknessGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 255, 255)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(0, 0, 0))}
+				DarknessGradient.Name = "DarknessGradient"
+				DarknessGradient.Parent = DarknessGradientFrame
+
+				Value2.Name = "Value"
+				Value2.Parent = ColorPicker
+				Value2.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+				Value2.BackgroundTransparency = 0.830
+				Value2.Position = UDim2.new(0.915488005, -47, 0, 4)
+				Value2.Size = UDim2.new(0, 78, 0, 17)
+
+				UICorner_4.CornerRadius = UDim.new(0, 4)
+				UICorner_4.Parent = Value2
+
+				ValueText2.Name = "ValueText"
+				ValueText2.Parent = Value2
+				ValueText2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				ValueText2.BackgroundTransparency = 1.000
+				ValueText2.BorderColor3 = Color3.fromRGB(27, 42, 53)
+				ValueText2.ClipsDescendants = true
+				ValueText2.Size = UDim2.new(1, 0, 1, 0)
+				ValueText2.Font = Enum.Font.Gotham
+				ValueText2.Text = "0, 0, 0"
+				ValueText2.TextColor3 = Color3.fromRGB(227, 225, 228)
+				ValueText2.TextSize = 12.000
+				ValueText2.TextWrapped = true
+
+
+				local colourGradientFrame = ColourGradientFrame
+				local colourSlider = Slider_2
+
+				local darknessGradientFrame =  DarknessGradientFrame
+				local darknessSlider = Slider
+
+				local colourPreview = ColourPreview
+
+
+				local mouse = game:GetService("Players").LocalPlayer:GetMouse()
+
+				local movingColourSlider = false
+				local movingDarknessSlider = false
+
+
+				colourSlider.MouseButton1Down:Connect(function()
+
+					movingColourSlider = true
+				end)
+				colourGradientFrame.MouseButton1Down:Connect(function()
+
+					movingColourSlider = true
+				end)
+
+				darknessSlider.MouseButton1Down:Connect(function()
+
+					movingDarknessSlider = true
+				end)
+				darknessGradientFrame.MouseButton1Down:Connect(function()
+
+					movingDarknessSlider = true
+				end)
+
+
+				colourSlider.MouseButton1Up:Connect(function()
+
+					movingColourSlider = false
+				end)
+				colourGradientFrame.MouseButton1Up:Connect(function()
+
+					movingColourSlider = false
+				end)
+
+				darknessSlider.MouseButton1Up:Connect(function()
+
+					movingDarknessSlider = false
+				end)
+				darknessGradientFrame.MouseButton1Up:Connect(function()
+
+					movingDarknessSlider = false
+				end)
+
+
+				mouse.Button1Up:Connect(function()
+
+					movingColourSlider = false
+					movingDarknessSlider = false
+				end)
+
+
+
+				mouse.Move:Connect(function()
+
+					if movingColourSlider then
+
+						local xOffset = (mouse.X - colourGradientFrame.AbsolutePosition.X)
+
+						xOffset = math.clamp(xOffset, 0, colourGradientFrame.AbsoluteSize.X)
+
+						local sliderPosNew = UDim2.new(0, xOffset, colourSlider.Position.Y)
+						colourSlider.Position = sliderPosNew
+					end
+
+					if movingDarknessSlider then
+
+						local xOffset = (mouse.X - colourGradientFrame.AbsolutePosition.X)
+
+						xOffset = math.clamp(xOffset, 0, colourGradientFrame.AbsoluteSize.X)
+
+						local sliderPosNew = UDim2.new(0, xOffset, colourSlider.Position.Y)
+						darknessSlider.Position = sliderPosNew
+					end
+				end)
+
+
+
+				function returnColour(percentage, gradientKeyPoints)
+
+					local leftColour = gradientKeyPoints[1]
+					local rightColour = gradientKeyPoints[#gradientKeyPoints]
+
+					local lerpPercent = 0.5
+					local colour = leftColour.Value
+
+
+					for i = 1, #gradientKeyPoints - 1 do
+
+						if gradientKeyPoints[i].Time <= percentage and gradientKeyPoints[i + 1].Time >= percentage then
+
+							leftColour = gradientKeyPoints[i]
+							rightColour = gradientKeyPoints[i + 1]
+
+							lerpPercent = (percentage - leftColour.Time) / (rightColour.Time - leftColour.Time)
+
+							colour = leftColour.Value:Lerp(rightColour.Value, lerpPercent)
+
+							return colour
+						end
+					end
+				end
+
+				function updateColourPreview()
+
+					local colourMinXPos = colourGradientFrame.AbsolutePosition.X
+					local colourMaxXPos = colourMinXPos + colourGradientFrame.AbsoluteSize.X
+
+					local colourXPixelSize = colourMaxXPos - colourMinXPos
+
+					local colourSliderX = colourSlider.AbsolutePosition.X
+
+					local colourXPos = (colourSliderX - colourMinXPos) / colourXPixelSize
+
+
+					local darknessMinXPos = darknessGradientFrame.AbsolutePosition.X
+					local darknessMaxXPos = darknessMinXPos + darknessGradientFrame.AbsoluteSize.X
+
+					local darknessXPixelSize = darknessMaxXPos - darknessMinXPos
+
+					local darknessSliderX = darknessSlider.AbsolutePosition.X
+
+					local darknessXPos = (darknessSliderX - darknessMinXPos) / darknessXPixelSize
+
+
+					--local darkness = returnColour(darknessXPos, darknessGradientFrame.DarknessGradient.Color.Keypoints)
+					--local darknessR, darknessG, darknessB = 255 - math.floor(darkness.R * 255), 255 - math.floor(darkness.G * 255), 255 - math.floor(darkness.B * 255)
+
+
+					local colour = returnColour(colourXPos, colourGradientFrame.ColourGradient.Color.Keypoints)
+					local colourR, colourG, colourB = math.floor(colour.R * 255), math.floor(colour.G * 255), math.floor(colour.B * 255)
+
+					local resultColour = Color3.fromRGB(colourR, colourG, colourB)
+
+					colourPreview.BackgroundColor3 = resultColour
+
+					if ValueText2.Text ~= "0, 0, 0" then
+						ValueText2.TextScaled = true
+					end
+					ValueText2.Text = tostring(resultColour)
+					callback(resultColour)
+				end
+
+
+				colourSlider:GetPropertyChangedSignal("Position"):Connect(updateColourPreview)
+				darknessSlider:GetPropertyChangedSignal("Position"):Connect(updateColourPreview)
+			end
+
+
+
+
+
+			function CreateNotification(Name, Description, Callback)
+				Name = Name or "Name"
+				Description = Description or "Description"
+				Callback = Callback or function() end
+
+				local Notification2 = Instance.new("Frame")
+				local UICorner = Instance.new("UICorner")
+				local _4pxShadow2px = Instance.new("ImageLabel")
+				local TitleBar = Instance.new("Frame")
+				local UICorner_2 = Instance.new("UICorner")
+				local Title = Instance.new("TextLabel")
+				local Corners = Instance.new("Frame")
+				local UICorner_3 = Instance.new("UICorner")
+				local TextLabel = Instance.new("TextLabel")
+				local Negative = Instance.new("Frame")
+				local UICorner_4 = Instance.new("UICorner")
+				local _4pxShadow2px_2 = Instance.new("ImageLabel")
+				local No = Instance.new("ImageButton")
+				local Sample = Instance.new("ImageLabel")
+				local Positive = Instance.new("Frame")
+				local UICorner_5 = Instance.new("UICorner")
+				local _4pxShadow2px_3 = Instance.new("ImageLabel")
+				local Yes = Instance.new("ImageButton")
+				local Sample_2 = Instance.new("ImageLabel")
+
+				Notification2.Name = "Notification 2"
+				Notification2.Parent = MyGui
+				Notification2.BackgroundColor3 = Color3.fromRGB(49, 49, 59)
+				Notification2.Position = UDim2.new(1.25, -390, 0, 900)
+				Notification2.Size = UDim2.new(0, 344, 0, 64)
+
+				UICorner.CornerRadius = UDim.new(0, 4)
+				UICorner.Parent = Notification2
+
+				_4pxShadow2px.Name = "4pxShadow(2px)"
+				_4pxShadow2px.Parent = Notification2
+				_4pxShadow2px.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				_4pxShadow2px.BackgroundTransparency = 1.000
+				_4pxShadow2px.Position = UDim2.new(0, -15, 0, -15)
+				_4pxShadow2px.Selectable = true
+				_4pxShadow2px.Size = UDim2.new(1, 30, 1, 30)
+				_4pxShadow2px.Image = "http://www.roblox.com/asset/?id=5761504593"
+				_4pxShadow2px.ImageColor3 = Color3.fromRGB(212, 212, 255)
+				_4pxShadow2px.ImageTransparency = 0.300
+				_4pxShadow2px.ScaleType = Enum.ScaleType.Slice
+				_4pxShadow2px.SliceCenter = Rect.new(17, 17, 283, 283)
+
+				TitleBar.Name = "Title Bar"
+				TitleBar.Parent = Notification2
+				TitleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
+				TitleBar.Size = UDim2.new(0, 344, 0, 22)
+
+				UICorner_2.CornerRadius = UDim.new(0, 4)
+				UICorner_2.Parent = TitleBar
+
+				Title.Name = "Title"
+				Title.Parent = TitleBar
+				Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				Title.BackgroundTransparency = 1.000
+				Title.BorderColor3 = Color3.fromRGB(27, 42, 53)
+				Title.Size = UDim2.new(0, 342, 0, 22)
+				Title.Font = Enum.Font.SourceSansSemibold
+				Title.Text = Name
+				Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+				Title.TextSize = 17.000
+
+				Corners.Name = "Corners"
+				Corners.Parent = TitleBar
+				Corners.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
+				Corners.Position = UDim2.new(0, 0, 0.799998879, 0)
+				Corners.Size = UDim2.new(0, 344, 0, 6)
+
+				UICorner_3.CornerRadius = UDim.new(0, 1)
+				UICorner_3.Parent = Corners
+
+				TextLabel.Parent = Notification2
+				TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				TextLabel.BackgroundTransparency = 1.000
+				TextLabel.Position = UDim2.new(0.020144796, 0, 0.399999619, 0)
+				TextLabel.Size = UDim2.new(0, 335, 0, 33)
+				TextLabel.Font = Enum.Font.SourceSansSemibold
+				TextLabel.Text = Description
+				TextLabel.TextColor3 = Color3.fromRGB(222, 222, 222)
+				TextLabel.TextSize = 16.000
+				TextLabel.TextWrapped = true
+				TextLabel.TextXAlignment = Enum.TextXAlignment.Left
+				TextLabel.TextYAlignment = Enum.TextYAlignment.Top
+
+				Negative.Name = "Negative"
+				Negative.Parent = Notification2
+				Negative.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
+				Negative.Position = UDim2.new(1.01569772, 0, 0.5625, 0)
+				Negative.Size = UDim2.new(0, 33, 0, 28)
+
+				UICorner_4.CornerRadius = UDim.new(0, 4)
+				UICorner_4.Parent = Negative
+
+				_4pxShadow2px_2.Name = "4pxShadow(2px)"
+				_4pxShadow2px_2.Parent = Negative
+				_4pxShadow2px_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				_4pxShadow2px_2.BackgroundTransparency = 1.000
+				_4pxShadow2px_2.Position = UDim2.new(0, -15, 0, -15)
+				_4pxShadow2px_2.Selectable = true
+				_4pxShadow2px_2.Size = UDim2.new(1, 30, 1, 30)
+				_4pxShadow2px_2.Image = "http://www.roblox.com/asset/?id=5761504593"
+				_4pxShadow2px_2.ImageColor3 = Color3.fromRGB(212, 212, 255)
+				_4pxShadow2px_2.ImageTransparency = 0.300
+				_4pxShadow2px_2.ScaleType = Enum.ScaleType.Slice
+				_4pxShadow2px_2.SliceCenter = Rect.new(17, 17, 283, 283)
+
+				No.Name = "No"
+				No.Parent = Negative
+				No.BackgroundTransparency = 1.000
+				No.LayoutOrder = 4
+				No.Position = UDim2.new(0.136363745, 0, 0.0357143879, 0)
+				No.Size = UDim2.new(0, 25, 0, 25)
+				No.ZIndex = 2
+				No.Image = "rbxassetid://3926305904"
+				No.ImageColor3 = Color3.fromRGB(255, 26, 26)
+				No.ImageRectOffset = Vector2.new(924, 724)
+				No.ImageRectSize = Vector2.new(36, 36)
+				No.ImageTransparency = 0.100
+
+				Sample.Name = "Sample"
+				Sample.Parent = No
+				Sample.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				Sample.BackgroundTransparency = 1.000
+				Sample.Image = "http://www.roblox.com/asset/?id=4560909609"
+				Sample.ImageColor3 = Color3.fromRGB(203, 203, 203)
+				Sample.ImageTransparency = 0.700
+
+				Positive.Name = "Positive"
+				Positive.Parent = Notification2
+				Positive.BackgroundColor3 = Color3.fromRGB(30, 30, 36)
+				Positive.Position = UDim2.new(1.01744187, 0, 0, 0)
+				Positive.Size = UDim2.new(0, 33, 0, 28)
+
+				UICorner_5.CornerRadius = UDim.new(0, 4)
+				UICorner_5.Parent = Positive
+
+				_4pxShadow2px_3.Name = "4pxShadow(2px)"
+				_4pxShadow2px_3.Parent = Positive
+				_4pxShadow2px_3.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				_4pxShadow2px_3.BackgroundTransparency = 1.000
+				_4pxShadow2px_3.Position = UDim2.new(0, -15, 0, -15)
+				_4pxShadow2px_3.Selectable = true
+				_4pxShadow2px_3.Size = UDim2.new(1, 30, 1, 30)
+				_4pxShadow2px_3.Image = "http://www.roblox.com/asset/?id=5761504593"
+				_4pxShadow2px_3.ImageColor3 = Color3.fromRGB(212, 212, 255)
+				_4pxShadow2px_3.ImageTransparency = 0.300
+				_4pxShadow2px_3.ScaleType = Enum.ScaleType.Slice
+				_4pxShadow2px_3.SliceCenter = Rect.new(17, 17, 283, 283)
+
+				Yes.Name = "Yes"
+				Yes.Parent = Positive
+				Yes.BackgroundTransparency = 1.000
+				Yes.ClipsDescendants = true
+				Yes.LayoutOrder = 4
+				Yes.Position = UDim2.new(0.106060594, 0, 0.0357142985, 0)
+				Yes.Size = UDim2.new(0, 25, 0, 25)
+				Yes.ZIndex = 2
+				Yes.Image = "rbxassetid://3926305904"
+				Yes.ImageColor3 = Color3.fromRGB(68, 255, 47)
+				Yes.ImageRectOffset = Vector2.new(644, 204)
+				Yes.ImageRectSize = Vector2.new(36, 36)
+				Yes.ImageTransparency = 0.100
+
+				Sample_2.Name = "Sample"
+				Sample_2.Parent = Yes
+				Sample_2.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+				Sample_2.BackgroundTransparency = 1.000
+				Sample_2.Image = "http://www.roblox.com/asset/?id=4560909609"
+				Sample_2.ImageColor3 = Color3.fromRGB(203, 203, 203)
+				Sample_2.ImageTransparency = 0.700
+
+				Instance.new("Sound", game:GetService("SoundService")).SoundId = "rbxassetid://1788243907"; game:GetService("SoundService").Sound:Play()
+
+				TS:Create(Notification2, TweenInfo.new(0.3, Enum.EasingStyle.Linear),{
+					Position = UDim2.new(
+						1, -390, 0, 900
+					)
+				}):Play()
+
+				No.MouseButton1Click:Connect(function()
+					spawn(function()
+						local ms = game:GetService("Players").LocalPlayer:GetMouse()
+						local btn = No
+						local sample = Sample
+						local c = sample:Clone()
+						c.Parent = btn
+						local x, y = (ms.X - c.AbsolutePosition.X), (ms.Y - c.AbsolutePosition.Y)
+						c.Position = UDim2.new(0, x, 0, y)
+						local len, size = 0.35, nil
+						if btn.AbsoluteSize.X >= btn.AbsoluteSize.Y then
+							size = (btn.AbsoluteSize.X * 1.5)
+						else
+							size = (btn.AbsoluteSize.Y * 1.5)
+						end
+						c:TweenSizeAndPosition(UDim2.new(0, size, 0, size), UDim2.new(0.5, (-size / 2), 0.5, (-size / 2)), 'Out', 'Quad', len, true, nil)
+						for i = 1, 10 do
+							c.ImageTransparency = c.ImageTransparency + 0.05
+							wait(len / 12)
+						end
+						c:Destroy()
+					end)
+					spawn(function() Callback(false) end)
+					wait(.12)
+					TS:Create(Notification2, TweenInfo.new(0.3, Enum.EasingStyle.Linear),{
+						Position = UDim2.new(
+							1.25, -390, 0, 900
+						)
+					}):Play()
+					wait(.5)
+					Notification2:Remove()
+				end)
+
+				Yes.MouseButton1Click:Connect(function()
+					spawn(function()
+						local ms = game:GetService("Players").LocalPlayer:GetMouse()
+						local btn = Yes
+						local sample = Sample_2
+						local c = sample:Clone()
+						c.Parent = btn
+						local x, y = (ms.X - c.AbsolutePosition.X), (ms.Y - c.AbsolutePosition.Y)
+						c.Position = UDim2.new(0, x, 0, y)
+						local len, size = 0.35, nil
+						if btn.AbsoluteSize.X >= btn.AbsoluteSize.Y then
+							size = (btn.AbsoluteSize.X * 1.5)
+						else
+							size = (btn.AbsoluteSize.Y * 1.5)
+						end
+						c:TweenSizeAndPosition(UDim2.new(0, size, 0, size), UDim2.new(0.5, (-size / 2), 0.5, (-size / 2)), 'Out', 'Quad', len, true, nil)
+						for i = 1, 10 do
+							c.ImageTransparency = c.ImageTransparency + 0.05
+							wait(len / 12)
+						end
+						c:Destroy()
+					end)
+					Callback(true)
+					wait(.12)
+					TS:Create(Notification2, TweenInfo.new(0.3, Enum.EasingStyle.Linear),{
+						Position = UDim2.new(
+							1.25, -390, 0, 900
+						)
+					}):Play()
+					wait(.5)
+					Notification2:Remove()
+				end)
+
+			end
+
+			return pagebuttons
+
+		end
+		return mytabbuttons
+	end
+	return tabs
 end
 
-local function hexToRGB(hex)
-    hex = hex:gsub("#","")
-	return RGB(tonumber("0x"..hex:sub(1,2)), tonumber("0x"..hex:sub(3,4)), tonumber("0x"..hex:sub(5,6)))
-end
-
-local function Protect_GUI(UI)
-    if syn then
-        print("Synapse X")
-        syn.protect_gui(UI)
-        UI.Parent=game:GetService("CoreGui")
-    elseif getexecutorname and getexecutorname() == "ScriptWare" then
-        print("Script-Ware")
-        UI.Parent=gethui()
-    elseif KRNL_LOADED then
-        print("KRNL")
-        UI.Parent=gethui()
-    else
-        print("Other Exec")
-        UI.Parent=game:GetService("CoreGui")
-    end
-end
-
---
-local function Count(t)
-    local c = 0
-    for _ in pairs(t) do c = c + 1 end
-    return c
-end
-
-local function isDestroyed(obj)
-	if obj.Parent then return false end
-	local _,res = pcall(function() obj.Parent = obj end)
-	return res:match("locked") and true or false
-end
-
-Library.NewWindow = function(window_info)
-    window_info.CloseCallback = window_info.CloseCallback or function()end
-
-    window_info.WindowSizeCallback = window_info.WindowSizeCallback or function()end
-    window_info.WindowSize = window_info.WindowSize or V2(557, 500)
-
-    window_info.WindowPositionCallback = window_info.WindowPositionCallback or function()end 
-    window_info.WindowPosition = window_info.WindowPosition or V2(500, 300)
-
-    window_info.ThemeOverrides = window_info.ThemeOverrides or {}
-
-    window_info.Scalable = (window_info.Scalable == nil and true) or window_info.Scalable
-
-    local window = {
-        ThemeUpdates = {},
-        DefaultTheme = {},
-        WinTheme = {
-            Background = RGB(30, 30, 30),
-        
-            Dark_Borders = RGB(25, 25, 25),
-            Light_Borders = RGB(255, 255, 255),
-        
-            Text_Color = RGB(255, 255, 255),
-            Text_Size_Big = 14,
-            Text_Size_Medium = 12,
-            Text_Size_Small = 10,
-        
-            Section_Background = RGB(25, 25, 25),
-        
-            Accent = RGB(0, 255, 0),
-            Dark_Accent = RGB(0, 100, 0)
-        }
-    }
-    local DESTROY_UI = false;
-
-    --
-
-    for i,o in pairs(window.WinTheme) do
-        window.DefaultTheme[i] = o
-    end
-    for i,o in pairs(window_info.ThemeOverrides) do
-        if window.WinTheme[i] and window.WinTheme[i] ~= o then
-            window.WinTheme[i] = o
-        end
-    end
-
-    --
-
-    local UI = NEW("ScreenGui")
-    local Window = NEW("Frame")
-    local Top_Bar = NEW("Frame")
-    local Title = NEW("TextLabel")
-    local Close = NEW("ImageButton")
-    local Close_Left = NEW("Frame")
-    local Close_Right = NEW("Frame")
-    local Minimize = NEW("ImageButton")
-    local Minimize_Left = NEW("Frame")
-    local Minimize_Right = NEW("Frame")
-    local Minimize_Top= NEW("Frame")
-    local Minimize_Bottom = NEW("Frame")
-    local Page_Selector = NEW("ScrollingFrame")
-    local Page_List_Layout = NEW("UIListLayout")
-    local Main = NEW("Frame")
-    local Manager = NEW("Frame")
-    local Manager_Border = NEW("Frame")
-    local Feature_Info = NEW("TextLabel")
-    local Pages = NEW("Frame")
-    local Picker_Windows = NEW("Frame")
-
-    function window.InfoMessage(text)
-        RStepped:Wait()
-        Feature_Info.Text = text
-    end
-    function window.ResetMessage()
-        window.InfoMessage("")
-    end
-
-    function window.NewThemeUpdater(list, action)
-        TBINSERT(window.ThemeUpdates, action)
-    end
-    function window.OverrideTheme(overrides)
-        if not overrides or Count(overrides) == 0 then return end
-
-        for i,o in pairs(overrides) do
-            if window.WinTheme[i] and window.WinTheme[i] ~= o then
-                window.WinTheme[i] = o
-            end
-        end
-
-        window.UpdateTheme()
-    end
-    function window.UpdateTheme()
-        for i,o in pairs(window.ThemeUpdates) do
-            o()
-        end
-    end
-    function window.ResetTheme()
-        for i,o in pairs(window.WinTheme) do
-            window.WinTheme[i] = window.DefaultTheme[i]
-        end
-
-        window.UpdateTheme()
-    end
-
-    local lastCPZIndex = 100000
-
-    UI.Name="UI"
-
-    Protect_GUI(UI)
-
-    UI.ZIndexBehavior = Enum.ZIndexBehavior.Global
-    UI.ResetOnSpawn=false;Window.Name="Window"Window.Parent=UI;Window.BackgroundColor3=RGB(255,255,255)Window.BackgroundTransparency=1.000;Window.Position=U2(0, window_info.WindowPosition.X, 0, window_info.WindowPosition.Y)Window.Size=U2(0,window_info.WindowSize.X,0,window_info.WindowSize.Y)Top_Bar.Name="Top_Bar"Top_Bar.Parent=Window;Top_Bar.Active=true;Top_Bar.BackgroundColor3=RGB(40,40,40)Top_Bar.BackgroundColor3=window.WinTheme.Background;Top_Bar.BorderColor3=window.WinTheme.Dark_Borders;Top_Bar.BorderSizePixel=2;Top_Bar.Size=U2(1,0,0,20)Top_Bar.ZIndex=10001;Title.Name="Title"Title.Parent=Top_Bar;Title.BackgroundColor3=RGB(255,255,255)Title.BackgroundTransparency=1.000;Title.Position=U2(0.5,0,0,0)Title.Size=U2(0,1,1,0)Title.ZIndex=10002;Title.Font=GTHM;Title.Text=window_info.Text or"Test Title"Title.TextColor3=window.WinTheme.Text_Color;Title.TextSize=window.WinTheme.Text_Size_Medium;Close.Name="Close"Close.Parent=Top_Bar;Close.BackgroundTransparency=1;Close.BackgroundColor3=window.WinTheme.Background;Close.BorderColor3=window.WinTheme.Accent;Close.BorderSizePixel=1;Close.Position=U2(1,-20,0,0)Close.Size=U2(0,20,0,20)Close.ZIndex=10005;Close.AutoButtonColor=false;Close.Image="rbxassetid://7246920077"Close_Left.Name="Close_Left"Close_Left.Parent=Close;Close_Left.BackgroundColor3=window.WinTheme.Background;Close_Left.BorderSizePixel=0;Close_Left.Size=U2(0,6,1,0)Close_Left.ZIndex=10006;Close_Right.Name="Close_Right"Close_Right.Parent=Close;Close_Right.BackgroundColor3=window.WinTheme.Background;Close_Right.BorderSizePixel=0;Close_Right.Position=U2(1,-6,0,0)Close_Right.Size=U2(0,6,1,0)Close_Right.ZIndex=10006;Minimize.Name="Minimize"Minimize.Parent=Top_Bar;Minimize.BackgroundTransparency=1;Minimize.BackgroundColor3=window.WinTheme.Background;Minimize.BorderColor3=window.WinTheme.Accent;Minimize.BorderSizePixel=1;Minimize.Position=U2(1,-41,0,0)Minimize.Size=U2(0,20,0,20)Minimize.ZIndex=10005;Minimize.AutoButtonColor=false;Minimize.Image=MinIcon;Minimize_Left.Name="Minimize_Left"Minimize_Left.Parent=Minimize;Minimize_Left.BackgroundColor3=window.WinTheme.Background;Minimize_Left.BorderSizePixel=0;Minimize_Left.Size=U2(0,6,1,0)Minimize_Left.ZIndex=10006;Minimize_Right.Name="Minimize_Right"Minimize_Right.Parent=Minimize;Minimize_Right.BackgroundColor3=window.WinTheme.Background;Minimize_Right.BorderSizePixel=0;Minimize_Right.Position=U2(1,-6,0,0)Minimize_Right.Size=U2(0,6,1,0)Minimize_Right.ZIndex=10006;Minimize_Top.Name="Minimize_Top"Minimize_Top.Parent=Minimize;Minimize_Top.BackgroundColor3=window.WinTheme.Background;Minimize_Top.BorderSizePixel=0;Minimize_Top.Size=U2(1,0,0,6)Minimize_Top.ZIndex=10006;Minimize_Bottom.Name="Minimize_Bottom"Minimize_Bottom.Parent=Minimize;Minimize_Bottom.BackgroundColor3=window.WinTheme.Background;Minimize_Bottom.BorderSizePixel=0;Minimize_Bottom.Position=U2(0,0,1,-6)Minimize_Bottom.Size=U2(1,0,0,6)Minimize_Bottom.ZIndex=10006;Page_Selector.Name="Page_Selector"Page_Selector.Parent=Window;Page_Selector.Active=true;Page_Selector.BackgroundColor3=window.WinTheme.Background;Page_Selector.BorderColor3=window.WinTheme.Dark_Borders;Page_Selector.BorderSizePixel=2;Page_Selector.Position=U2(0,0,0,22)Page_Selector.Size=U2(1,0,0,32)Page_Selector.ZIndex=10000;Page_Selector.CanvasSize=U2(0,0,0,0)Page_Selector.AutomaticCanvasSize=Enum.AutomaticSize.X;Page_Selector.ScrollBarThickness=0;Page_List_Layout.Name="Page_List_Layout"Page_List_Layout.Parent=Page_Selector;Page_List_Layout.Padding=U1(0,0)Page_List_Layout.FillDirection=Enum.FillDirection.Horizontal;Page_List_Layout.HorizontalAlignment=Enum.HorizontalAlignment.Center;Page_List_Layout.SortOrder=SOLO;Main.Name="Main"Main.Parent=Window;Main.BackgroundColor3=window.WinTheme.Background;Main.BorderColor3=window.WinTheme.Dark_Borders;Main.BorderSizePixel=2;Main.Position=U2(0,0,0,55)Main.Size=U2(1,0,1,-55)Manager.Name="Manager"Manager.Parent=Main;Manager.BackgroundColor3=RGB(255,255,255)Manager.BackgroundTransparency=1.000;Manager.Position=U2(0,0,1,-60)Manager.Size=U2(1,0,0,60)Manager_Border.Name="Manager_Border"Manager_Border.Parent=Manager;Manager_Border.BackgroundColor3=window.WinTheme.Dark_Borders;Manager_Border.BorderSizePixel=0;Manager_Border.Position=U2(0,5,0,-1)Manager_Border.Size=U2(1,-9,0,2)Picker_Windows.Name="Picker_Windows"Picker_Windows.Parent=UI;Picker_Windows.BackgroundColor3=RGB(255,255,255)Picker_Windows.BackgroundTransparency=1.000;Picker_Windows.Size=U2(1,0,1,0)Feature_Info.Name="Feature_Info"Feature_Info.Parent=Manager;Feature_Info.BackgroundColor3=window.WinTheme.Dark_Borders;Feature_Info.BorderColor3=window.WinTheme.Dark_Borders;Feature_Info.BorderSizePixel=4;Feature_Info.Position=U2(0,9,1,-25)Feature_Info.Size=U2(1,-18,0,16)Feature_Info.Font=GTHM;Feature_Info.Text="This will turn ESP on/off"Feature_Info.TextColor3=window.WinTheme.Text_Color;Feature_Info.TextSize=window.WinTheme.Text_Size_Medium;Feature_Info.TextTruncate=Enum.TextTruncate.AtEnd;Feature_Info.TextXAlignment=TXAL
-
-    window.NewThemeUpdater({Top_Bar, Title, Close, Close_Left, Close_Right, Minimize, Minimize_Left, Minimize_Right, Minimize_Top, Minimize_Bottom, Page_Selector, Main, Manager_Border, Feature_Info}, function()
-        Top_Bar.BackgroundColor3=window.WinTheme.Background;Top_Bar.BorderColor3=window.WinTheme.Dark_Borders;Title.TextColor3=window.WinTheme.Text_Color;Title.TextSize=window.WinTheme.Text_Size_Medium;Close.BackgroundColor3=window.WinTheme.Background;Close.BorderColor3=window.WinTheme.Accent;Close_Left.BackgroundColor3=window.WinTheme.Background;Close_Right.BackgroundColor3=window.WinTheme.Background;Minimize.BackgroundColor3=window.WinTheme.Background;Minimize.BorderColor3=window.WinTheme.Accent;Minimize_Left.BackgroundColor3=window.WinTheme.Background;Minimize_Right.BackgroundColor3=window.WinTheme.Background;Minimize_Top.BackgroundColor3=window.WinTheme.Background;Minimize_Bottom.BackgroundColor3=window.WinTheme.Background;Page_Selector.BackgroundColor3=window.WinTheme.Background;Page_Selector.BorderColor3=window.WinTheme.Dark_Borders;Main.BackgroundColor3=window.WinTheme.Background;Main.BorderColor3=window.WinTheme.Dark_Borders;Manager_Border.BackgroundColor3=window.WinTheme.Dark_Borders;Feature_Info.BackgroundColor3=window.WinTheme.Dark_Borders;Feature_Info.BorderColor3=window.WinTheme.Dark_Borders;Feature_Info.TextColor3=window.WinTheme.Text_Color;Feature_Info.TextSize=window.WinTheme.Text_Size_Medium
-    end)
-
-    local Top_Bar_Min = Title.TextBounds.X + 20*2 + 60
-
-    Pages.Name = "Pages"Pages.Parent = Main;Pages.BackgroundColor3 = RGB(255, 255, 255);Pages.BackgroundTransparency = 1.000;Pages.Size = U2(1, 0, 1, -60)
-    
-    local prompt_Active = false
-
-    local UI_Toggled = true
-    function window.Toggle(state)
-        if not prompt_Active then
-            UI_Toggled = state or not UI_Toggled
-            Window.Visible = state or UI_Toggled
-            Picker_Windows.Visible = state or UI_Toggled  
-        end
-    end
-
-    function window.Destroy()
-        DESTROY_UI = true
-        UI:Destroy()
-    end
-
-    local Custom_Cursor = {}
-    do -- CURSOR
-        local Cursor = NEW("ImageLabel")
-
-        Cursor = NEW("ImageLabel")
-        Cursor.Name = "Cursor"
-        Cursor.Parent = UI
-        Cursor.Size = U2(0, 64, 0, 64)
-        Cursor.ZIndex = 1000001
-        Cursor.Visible = false
-        Cursor.BackgroundTransparency = 1
-
-        --
-        local Cursor_Lock = function()
-            if DESTROY_UI then
-                Cursor:Destroy()
-                RS:UnbindFromRenderStep("CursorLock")
-            else
-                Cursor.Position = U2(0, Mouse.X-Cursor.AbsoluteSize.X/2, 0, Mouse.Y-Cursor.AbsoluteSize.Y/2)
-            end
-        end
-        
-        function Custom_Cursor.Show_Custom_Cursor(CursorId)
-            UIS.MouseIconEnabled = false
-
-            Cursor.Image = CursorId
-            Cursor.Visible = true
-
-            RS:BindToRenderStep("CursorLock", 1, Cursor_Lock)
-        end
-        function Custom_Cursor.Hide_Custom_Cursor()
-            UIS.MouseIconEnabled = true
-            Cursor.Visible = false
-            
-            RS:UnbindFromRenderStep("CursorLock")
-        end
-    end
-
-    local Minimized = false
-    do -- MINIMIZE
-        local function Minimize_UI()
-            Minimized = not Minimized
-            
-            Page_Selector.Visible = not Minimized
-            Main.Visible = not Minimized
-
-            if Main.Visible then
-                Minimize.Image = MinIcon
-            else
-                Minimize.Image = PlusIcon
-            end
-        end
-
-        Minimize.MouseButton1Click:Connect(Minimize_UI)
-
-        Minimize.MouseEnter:Connect(function()
-            Minimize.ZIndex = 10006
-            Minimize.BackgroundTransparency = 0
-            Minimize.ImageColor3 = window.WinTheme.Accent;
-
-            window.InfoMessage("Minimizes the Window")
-        end)
-    
-        Minimize.MouseLeave:Connect(function()
-            window.ResetMessage()
-
-            Minimize.ZIndex = 10005
-            Minimize.BackgroundTransparency = 1
-            Minimize.ImageColor3 = RGB(255, 255, 255)
-        end)
-
-        window.Minimize = Minimize_UI
-    end
-
-    do -- CLOSE
-
-        Close.MouseButton1Click:Connect(function()
-            window_info.CloseCallback()
-            window.Destroy()
-        end)
-
-        Close.MouseEnter:Connect(function()
-            Close.ZIndex = 10006
-            Close.BackgroundTransparency = 0
-            Close.ImageColor3 = window.WinTheme.Accent;
-
-            window.InfoMessage("Kills the Window")
-        end)
-    
-        Close.MouseLeave:Connect(function()
-            window.ResetMessage()
-
-            Close.ZIndex = 10005
-            Close.BackgroundTransparency = 1
-            Close.ImageColor3 = RGB(255, 255, 255)
-        end)
-    end
-
-    do -- WINDOW DRAGGING
-        local Dragging_UI
-        local Previous_Offset
-
-        local dragTween = false;
-        local previousPos = V2(Window.AbsolutePosition.X, Window.AbsolutePosition.Y)
-
-        local drag; drag = UIS.InputChanged:Connect(function(input)
-            if DESTROY_UI then
-                drag:Disconnect()
-            elseif Dragging_UI and input.UserInputType == UIT.MouseMovement then
-
-                if dragTween then dragTween:Cancel() end
-
-                dragTween = TS:Create(Window, TWEEN(0.04, ESS, EDO), {Position = U2(0, Mouse.X + Previous_Offset.X, 0, Mouse.Y + Previous_Offset.Y)})
-                dragTween:Play()
-
-                local newPos = V2(Window.AbsolutePosition.X, Window.AbsolutePosition.Y)
-
-                if newPos ~= previousPos then
-                    window_info.WindowPositionCallback(newPos)
-                end
-
-                previousPos = newPos
-            end
-        end)
-
-        local inp; inp = UIS.InputBegan:Connect(function(input)
-            if DESTROY_UI then
-                inp:Disconnect()
-            elseif input.UserInputType == MB1 and MouseIn(Top_Bar) and not MouseIn(Close) and not MouseIn(Minimize) then
-                Previous_Offset = V2(Window.AbsolutePosition.X, Window.AbsolutePosition.Y) - V2(Mouse.X, Mouse.Y)
-                Dragging_UI = true
-            end
-        end)
-
-        local outp; outp = UIS.InputEnded:Connect(function(input)
-            if DESTROY_UI then
-                outp:Disconnect()
-            elseif input.UserInputType == MB1 then
-                Dragging_UI = false
-            end
-        end)
-
-        function window.SetPosition(position)
-            Window.Position = U2(0, position.X, 0, position.Y)
-            window_info.WindowPositionCallback(position)
-        end
-    end
-
-    function window.SetPosition(position)
-        Window.Position = U2(0, position.X, 0, position.Y)
-        window_info.WindowPositionCallback(position)
-    end
-    function window.GetPosition()
-        return V2(Window.AbsolutePosition.X, Window.AbsolutePosition.Y)
-    end
-    
-    if (window_info.Scalable) then
-        do -- WINDOW SCALING
-            local ResizeX = NEW("TextButton")
-            local ResizeY = NEW("TextButton")
-            local ResizeXY = NEW("TextButton")
-
-            ResizeX.Name="ResizeX"ResizeX.Parent=Window;ResizeX.AutoButtonColor=false;ResizeX.BackgroundColor3=window.WinTheme.Dark_Accent;ResizeX.BackgroundTransparency=0;ResizeX.Position=U2(1,-2,0,27)ResizeX.BorderSizePixel=0;ResizeX.Size=U2(0,2,1,-36)ResizeX.ZIndex=100000;ResizeX.Font=GTHM;ResizeX.Text=""ResizeX.TextColor3=RGB(0,0,0)ResizeX.TextSize=window.WinTheme.Text_Size_Medium;ResizeX.Visible=true;ResizeY.Name="ResizeY"ResizeY.Parent=Window;ResizeY.AutoButtonColor=false;ResizeY.BackgroundColor3=window.WinTheme.Dark_Accent;ResizeY.BorderSizePixel=0;ResizeY.BackgroundTransparency=0;ResizeY.Position=U2(0,5,1,-2)ResizeY.Size=U2(1,-14,0,2)ResizeY.ZIndex=100000;ResizeY.Font=GTHM;ResizeY.Text=""ResizeY.TextColor3=RGB(0,0,0)ResizeY.TextSize=window.WinTheme.Text_Size_Big;ResizeY.Visible=true
-
-            window.NewThemeUpdater({ResizeX, ResizeY}, function()
-                ResizeX.BackgroundColor3 = window.WinTheme.Dark_Accent;
-                ResizeX.TextSize = window.WinTheme.Text_Size_Medium;
-                ResizeY.BackgroundColor3 = window.WinTheme.Dark_Accent;
-                ResizeY.TextSize = window.WinTheme.Text_Size_Big;
-            end)
-
-            local Mouse_Scaling_X = false
-            local Mouse_Scaling_Y = false
-
-            ResizeX.MouseEnter:Connect(function()
-                if not Mouse_Scaling_Y then
-                    ResizeX.BackgroundColor3 = window.WinTheme.Accent;
-                    Custom_Cursor.Show_Custom_Cursor(HorizontalSizeId)
-                    window.InfoMessage("Scales the Window (Horizontal)")
-                end
-            end)
-
-            ResizeX.MouseLeave:Connect(function()
-                if not Mouse_Scaling_Y and not Mouse_Scaling_X then
-                    ResizeX.BackgroundColor3 = window.WinTheme.Dark_Accent
-                    Custom_Cursor.Hide_Custom_Cursor()
-                    window.ResetMessage()
-                end
-            end)
-
-            ResizeY.MouseEnter:Connect(function()
-                if not Mouse_Scaling_X then
-                    ResizeY.BackgroundColor3 = window.WinTheme.Accent;
-                    Custom_Cursor.Show_Custom_Cursor(VerticalSizeId)
-                    window.InfoMessage("Scales the Window (Vertical)")
-                end
-            end)
-
-            ResizeY.MouseLeave:Connect(function()
-                if not Mouse_Scaling_Y and not Mouse_Scaling_X then
-                    ResizeY.BackgroundColor3 = window.WinTheme.Dark_Accent
-                    Custom_Cursor.Hide_Custom_Cursor()
-                    window.ResetMessage()
-                end
-            end)
-
-            ResizeX.MouseButton1Down:Connect(function()
-                if not Mouse_Scaling_Y then
-                    Mouse_Scaling_X = true
-                end
-            end)
-
-            ResizeY.MouseButton1Down:Connect(function()
-                if not Mouse_Scaling_X then
-                    Mouse_Scaling_Y = true
-                end
-            end)
-            
-            local Resize_Diag = NEW("Folder")
-
-            do -- Diagonal 
-                ResizeXY.Name="ResizeXY"ResizeXY.Parent=Window;ResizeXY.AutoButtonColor=false;ResizeXY.BackgroundColor3=window.WinTheme.Dark_Accent;ResizeXY.BackgroundTransparency=0;ResizeXY.Position=U2(1,-6,1,-6)ResizeXY.BorderSizePixel=0;ResizeXY.Size=U2(0,6,0,6)ResizeXY.ZIndex=100000;ResizeXY.Text=""ResizeXY.Visible=true
-            
-                window.NewThemeUpdater({ResizeXY}, function()
-                    ResizeXY.BackgroundColor3 = window.WinTheme.Dark_Accent;
-                end)
-
-                --
-
-                ResizeXY.MouseEnter:Connect(function()
-                    if not Mouse_Scaling_Y and not Mouse_Scaling_X then
-                        ResizeXY.BackgroundColor3 = window.WinTheme.Accent
-
-                        Custom_Cursor.Show_Custom_Cursor(DiagonalSizeId)
-                        window.InfoMessage("Scales the Window")
-                    end
-                end)
-    
-                ResizeXY.MouseLeave:Connect(function()
-                    if not Mouse_Scaling_Y and not Mouse_Scaling_X then
-                        ResizeXY.BackgroundColor3 = window.WinTheme.Dark_Accent
-                        Custom_Cursor.Hide_Custom_Cursor()
-                        window.ResetMessage()
-                    end
-                end)
-
-                ResizeXY.MouseButton1Down:Connect(function()
-                    Mouse_Scaling_X = true
-                    Mouse_Scaling_Y = true
-                end)
-
-            end
-
-            local Mouse_Connection; Mouse_Connection = UIS.InputEnded:Connect(function(input)
-                if DESTROY_UI then
-                    Mouse_Connection:Disconnect()
-                elseif input.UserInputType == MB1 then
-                    if (Mouse_Scaling_X or Mouse_Scaling_Y) and not MouseIn(ResizeX) and not MouseIn(ResizeY) and not MouseIn(ResizeXY) then
-                        window.ResetMessage()
-                    end
-
-                    if MouseIn(ResizeX) then
-                        ResizeX.BackgroundColor3 = window.WinTheme.Accent;
-                        window.InfoMessage("Scales the Window (Horizontal)")
-                    elseif Mouse_Scaling_X then
-                        Custom_Cursor.Hide_Custom_Cursor()
-                        ResizeX.BackgroundColor3 = window.WinTheme.Dark_Accent
-                        window.ResetMessage()
-                    end
-                    
-                    if MouseIn(ResizeY) then
-                        ResizeY.BackgroundColor3 = window.WinTheme.Accent;
-                        window.InfoMessage("Scales the Window (Vertical)")
-                    elseif Mouse_Scaling_Y then
-                        Custom_Cursor.Hide_Custom_Cursor()
-                        ResizeY.BackgroundColor3 = window.WinTheme.Dark_Accent
-                        window.ResetMessage()
-                    end
-
-                    if MouseIn(ResizeXY) then
-                        ResizeXY.BackgroundColor3 = window.WinTheme.Accent
-                        window.InfoMessage("Scales the Window")
-                    elseif Mouse_Scaling_Y or Mouse_Scaling_X then
-                        Custom_Cursor.Hide_Custom_Cursor()
-                        ResizeXY.BackgroundColor3 = window.WinTheme.Dark_Accent
-                        window.ResetMessage()
-                    end
-
-                    Mouse_Scaling_X = false
-                    Mouse_Scaling_Y = false
-                end
-            end)
-
-            local scalingBind = "CScaling"..random_string(10)
-            local previousSize = V2(Window.AbsoluteSize.X, Window.AbsoluteSize.Y)
-
-            local Scaling_Connection; Scaling_Connection = function()
-                if DESTROY_UI then
-                    RS:UnbindFromRenderStep(scalingBind)
-                elseif UI_Toggled and Minimized == false and (Mouse_Scaling_Y or Mouse_Scaling_X) then
-
-                    local offset_mouseY = Mouse.Y - Window.AbsolutePosition.Y
-                    local offset_mouseX = Mouse.X - Window.AbsolutePosition.X
-
-                    local new_Y = (Mouse_Scaling_Y and U1(0, CLAMP(offset_mouseY, 130, HUGE))) or U1(0, Window.AbsoluteSize.Y);
-                    local new_X = (Mouse_Scaling_X and U1(0, CLAMP(offset_mouseX, Top_Bar_Min, HUGE))) or U1(0, Window.AbsoluteSize.X);
-
-                    TS:Create(Window, TWEEN(0.05, ESS, EDO), {Size = U2(new_X, new_Y)}):Play()
-
-                    local newSize = V2(Window.AbsoluteSize.X, Window.AbsoluteSize.Y)
-                    if newSize ~= previousSize then window_info.WindowSizeCallback(newSize) end
-
-                    previousSize = newSize
-
-                else
-                    if UI_Toggled == false or Minimized then
-                        ResizeY.Visible = false
-                        ResizeX.Visible = false
-                        ResizeXY.Visible = false
-
-                        WRAP(function()
-                            repeat WAIT() until UI_Toggled and not Minimized
-                            RS:BindToRenderStep(scalingBind, 1, Scaling_Connection)
-                        end)()
-
-                        RS:UnbindFromRenderStep(scalingBind)
-                    else
-                        ResizeY.Visible = true
-                        ResizeX.Visible = true
-                        ResizeXY.Visible = true
-                    end
-                end
-            end
-
-            RS:BindToRenderStep(scalingBind, 1, Scaling_Connection)
-        end
-    end
-
-    function window.SetSize(size)
-        Window.Size = U2(0, size.X, 0, size.Y)
-        window_info.WindowPositionCallback(size)
-    end
-    function window.GetSize()
-        return V2(Window.AbsoluteSize.X, Window.AbsoluteSize.Y)
-    end
-
-    do -- UNIVERSAL BUTTON
-        local Button_Holder = NEW("ScrollingFrame")
-        local Button_List_Layout = NEW("UIListLayout")
-
-        Button_Holder.Name="Button_Holder"Button_Holder.Parent=Manager;Button_Holder.Active=true;Button_Holder.BackgroundTransparency=1;Button_Holder.Position=U2(0,7,0,6)Button_Holder.Size=U2(1,-13,0,20)Button_Holder.CanvasSize=U2(0,0,0,0)Button_Holder.AutomaticCanvasSize=Enum.AutomaticSize.X;Button_Holder.ScrollBarThickness=0;Button_List_Layout.Name="Button_List_Layout"Button_List_Layout.Parent=Button_Holder;Button_List_Layout.Padding=U1(0,4)Button_List_Layout.FillDirection=Enum.FillDirection.Horizontal;Button_List_Layout.HorizontalAlignment=Enum.HorizontalAlignment.Left;Button_List_Layout.SortOrder=SOLO
-        
-        function window.NewUniversalButton(info)
-            local Univ_Button = NEW("TextButton")
-
-            Univ_Button.Name="Univ_Button"Univ_Button.Parent=Button_Holder;Univ_Button.BackgroundColor3=window.WinTheme.Dark_Borders;Univ_Button.BorderColor3=window.WinTheme.Light_Borders;Univ_Button.AutoButtonColor=false;Univ_Button.Font=GTHM;Univ_Button.Text=info.Text or"Button"Univ_Button.BorderMode=Enum.BorderMode.Inset;Univ_Button.TextColor3=window.WinTheme.Text_Color;Univ_Button.TextSize=window.WinTheme.Text_Size_Medium
-
-            window.NewThemeUpdater({Univ_Button}, function()
-                Univ_Button.BackgroundColor3 = window.WinTheme.Dark_Borders;
-                Univ_Button.BorderColor3 = window.WinTheme.Light_Borders;
-                Univ_Button.TextColor3 = window.WinTheme.Text_Color;
-                Univ_Button.TextSize = window.WinTheme.Text_Size_Medium;
-            end)
-
-            local function UpdateSize()
-                Univ_Button.Size = U2(0, Univ_Button.TextBounds.X + 12, 1, 0)
-            end
-            UpdateSize()
-
-            Univ_Button.MouseButton1Click:Connect(function()
-                info.Callback()
-            end)
-
-            Univ_Button.MouseEnter:Connect(function()
-                Univ_Button.BorderColor3 = window.WinTheme.Accent;
-                Univ_Button.TextColor3 = window.WinTheme.Accent;
-    
-                window.InfoMessage(info.Description or "")
-            end)
-        
-            Univ_Button.MouseLeave:Connect(function()
-                window.ResetMessage()
-    
-                Univ_Button.BorderColor3 = window.WinTheme.Light_Borders;
-                Univ_Button.TextColor3 = window.WinTheme.Text_Color;
-            end)
-
-            local button_funcs = {}
-
-            function button_funcs.Fire(times)
-                for i = 1, times or 1 do
-                    info.Callback()
-                end
-            end
-
-            function button_funcs.SetText(text)
-                Univ_Button.Text = text or "Button"
-                UpdateSize()
-            end
-            function button_funcs.GetText()
-                return Univ_Button.Text
-            end
-
-            function button_funcs.ReplaceCallback(newfunc)
-                info.Callback = newfunc
-            end
-
-            return button_funcs
-        end
-    end
-
-    do -- PROMPTS
-        local Prompt = NEW("Folder")
-        local Prompt_Blur = NEW("Frame")
-        local Prompt_Window = NEW("Frame")
-        local Prompt_Top_Bar = NEW("Frame")
-        local Prompt_Title = NEW("TextLabel")
-        local Prompt_Main = NEW("Frame")
-        local Prompt_Body = NEW("TextLabel")
-        local Prompt_Countdown = NEW("TextLabel")
-        local Accept_Button = NEW("TextButton")
-        local Prompt_Border = NEW("Frame")
-        local Reject_Button = NEW("TextButton")
-
-        Prompt.Name="Prompt"Prompt.Parent=UI;Prompt_Blur.Name="Prompt_Blur"Prompt_Blur.Parent=Prompt;Prompt_Blur.BackgroundColor3=RGB(100,100,100)Prompt_Blur.BackgroundTransparency=0.8;Prompt_Blur.Size=U2(1,0,1,UI_Inset.Y)Prompt_Blur.Position=U2(0,0,0,-UI_Inset.Y)Prompt_Blur.BorderSizePixel=0;Prompt_Blur.ZIndex=1000000;Prompt_Blur.Visible=false;Prompt_Window.Name="Prompt_Window"Prompt_Window.Parent=Prompt;Prompt_Window.BackgroundColor3=RGB(255,255,255)Prompt_Window.BackgroundTransparency=1.000;Prompt_Window.BorderColor3=RGB(27,42,53)Prompt_Window.Position=U2(0.5,-180,0.5,-80)Prompt_Window.Size=U2(0,360,0,162)Prompt_Window.ZIndex=1000000;Prompt_Window.Visible=false;Prompt_Top_Bar.Name="Prompt_Top_Bar"Prompt_Top_Bar.Parent=Prompt_Window;Prompt_Top_Bar.BackgroundColor3=window.WinTheme.Background;Prompt_Top_Bar.BorderColor3=window.WinTheme.Dark_Borders;Prompt_Top_Bar.BorderSizePixel=2;Prompt_Top_Bar.Size=U2(1,0,0,20)Prompt_Top_Bar.ZIndex=1000001;Prompt_Title.Name="Prompt_Title"Prompt_Title.Parent=Prompt_Top_Bar;Prompt_Title.BackgroundColor3=RGB(255,255,255)Prompt_Title.BackgroundTransparency=1.000;Prompt_Title.Position=U2(0,5,0,0)Prompt_Title.Size=U2(0,1,1,0)Prompt_Title.ZIndex=1000002;Prompt_Title.Font=GTHM;Prompt_Title.Text="Prompt"Prompt_Title.TextColor3=window.WinTheme.Text_Color;Prompt_Title.TextSize=window.WinTheme.Text_Size_Medium;Prompt_Title.TextXAlignment=TXAL;Prompt_Main.Name="Prompt_Main"Prompt_Main.Parent=Prompt_Window;Prompt_Main.BackgroundColor3=window.WinTheme.Background;Prompt_Main.BorderColor3=window.WinTheme.Dark_Borders;Prompt_Main.BorderSizePixel=2;Prompt_Main.Position=U2(0,0,0,22)Prompt_Main.Size=U2(1,0,1,-22)Prompt_Main.ZIndex=1000001;Prompt_Body.Name="Prompt_Body"Prompt_Body.Parent=Prompt_Main;Prompt_Body.BackgroundColor3=window.WinTheme.Background;Prompt_Body.BorderSizePixel=0;Prompt_Body.Position=U2(0,5,0,10)Prompt_Body.Size=U2(1,-10,1,-44)Prompt_Body.ZIndex=1000002;Prompt_Body.Font=GTHM;Prompt_Body.RichText=true;Prompt_Body.Text=""Prompt_Body.TextColor3=window.WinTheme.Text_Color;Prompt_Body.TextSize=window.WinTheme.Text_Size_Medium;Prompt_Body.TextWrapped=true;Prompt_Body.TextXAlignment=TXAL;Prompt_Body.TextYAlignment=Enum.TextYAlignment.Top;Prompt_Countdown.Name="Prompt_Countdown"Prompt_Countdown.Parent=Prompt_Main;Prompt_Countdown.BackgroundColor3=RGB(255,255,255)Prompt_Countdown.BackgroundTransparency=1.000;Prompt_Countdown.Position=U2(0,5,1,-24)Prompt_Countdown.Size=U2(0,1,0,18)Prompt_Countdown.ZIndex=1000002;Prompt_Countdown.Font=GTHM;Prompt_Countdown.Text="Time Remaining:"Prompt_Countdown.TextColor3=window.WinTheme.Text_Color;Prompt_Countdown.TextSize=window.WinTheme.Text_Size_Medium;Prompt_Countdown.TextXAlignment=TXAL;Accept_Button.Name="Accept_Button"Accept_Button.Parent=Prompt_Main;Accept_Button.BackgroundColor3=window.WinTheme.Dark_Borders;Accept_Button.BorderColor3=window.WinTheme.Light_Borders;Accept_Button.Position=U2(1,-72,1,-24)Accept_Button.Size=U2(0,30,0,18)Accept_Button.ZIndex=1000002;Accept_Button.AutoButtonColor=false;Accept_Button.Font=GTHM;Accept_Button.Text="Yes"Accept_Button.TextColor3=window.WinTheme.Text_Color;Accept_Button.TextSize=window.WinTheme.Text_Size_Medium;Accept_Button.TextWrapped=true;Prompt_Border.Name="Prompt_Border"Prompt_Border.Parent=Prompt_Main;Prompt_Border.BackgroundColor3=window.WinTheme.Dark_Borders;Prompt_Border.BorderSizePixel=0;Prompt_Border.Position=U2(0,5,1,-30)Prompt_Border.Size=U2(1,-10,0,1)Prompt_Border.ZIndex=1000002;Reject_Button.Name="Reject_Button"Reject_Button.Parent=Prompt_Main;Reject_Button.BackgroundColor3=window.WinTheme.Dark_Borders;Reject_Button.BorderColor3=window.WinTheme.Light_Borders;Reject_Button.Position=U2(1,-36,1,-24)Reject_Button.Size=U2(0,30,0,18)Reject_Button.ZIndex=1000002;Reject_Button.AutoButtonColor=false;Reject_Button.Font=GTHM;Reject_Button.Text="No"Reject_Button.TextColor3=window.WinTheme.Text_Color;Reject_Button.TextSize=window.WinTheme.Text_Size_Medium;Reject_Button.TextWrapped=true
-
-        window.NewThemeUpdater({Prompt_Top_Bar, Prompt_Title, Prompt_Main, Prompt_Body, Prompt_Countdown, Accept_Button, Prompt_Border, Reject_Button}, function()
-            Prompt_Top_Bar.BackgroundColor3=window.WinTheme.Background;Prompt_Top_Bar.BorderColor3=window.WinTheme.Dark_Borders;Prompt_Title.TextColor3=window.WinTheme.Text_Color;Prompt_Title.TextSize=window.WinTheme.Text_Size_Medium;Prompt_Main.BackgroundColor3=window.WinTheme.Background;Prompt_Main.BorderColor3=window.WinTheme.Dark_Borders;Prompt_Body.BackgroundColor3=window.WinTheme.Background;Prompt_Body.TextColor3=window.WinTheme.Text_Color;Prompt_Body.TextSize=window.WinTheme.Text_Size_Medium;Prompt_Countdown.TextColor3=window.WinTheme.Text_Color;Prompt_Countdown.TextSize=window.WinTheme.Text_Size_Medium;Accept_Button.BackgroundColor3=window.WinTheme.Dark_Borders;Accept_Button.BorderColor3=window.WinTheme.Light_Borders;Accept_Button.TextColor3=window.WinTheme.Text_Color;Accept_Button.TextSize=window.WinTheme.Text_Size_Medium;Prompt_Border.BackgroundColor3=window.WinTheme.Dark_Borders;Reject_Button.BackgroundColor3=window.WinTheme.Dark_Borders;Reject_Button.BorderColor3=window.WinTheme.Light_Borders;Reject_Button.TextColor3=window.WinTheme.Text_Color;Reject_Button.TextSize=window.WinTheme.Text_Size_Medium
-        end)
-
-        local prompt_Accept_Callback = function()end
-        local prompt_Reject_Callback = function()end
-
-        Accept_Button.MouseButton1Click:Connect(function()
-            Prompt_Blur.Visible = false
-            Prompt_Window.Visible = false
-            prompt_Active = false
-            Window.Visible = true
-
-            prompt_Accept_Callback()
-        end)
-
-        Accept_Button.MouseEnter:Connect(function()
-            Accept_Button.BorderColor3 = window.WinTheme.Accent;
-            Accept_Button.TextColor3 = window.WinTheme.Accent;
-        end)
-
-        Accept_Button.MouseLeave:Connect(function()
-            Accept_Button.BorderColor3 = window.WinTheme.Light_Borders;
-            Accept_Button.TextColor3 = window.WinTheme.Text_Color;
-        end)
-
-        Reject_Button.MouseButton1Click:Connect(function()
-            Prompt_Blur.Visible = false
-            Prompt_Window.Visible = false
-            prompt_Active = false
-            Window.Visible = true
-
-            prompt_Reject_Callback()
-        end)
-
-        Reject_Button.MouseEnter:Connect(function()
-            Reject_Button.BorderColor3 = window.WinTheme.Accent;
-            Reject_Button.TextColor3 = window.WinTheme.Accent;
-        end)
-
-        Reject_Button.MouseLeave:Connect(function()
-            Reject_Button.BorderColor3 = window.WinTheme.Light_Borders;
-            Reject_Button.TextColor3 = window.WinTheme.Text_Color;
-        end)
-
-        function window.NewPrompt(prompt_info)
-            prompt_info.Name = prompt_info.Name or "Def Prompt"
-            prompt_info.Text = prompt_info.Text or "I am a prompt"
-
-            prompt_Active = true
-            Window.Visible = false
-
-            prompt_Accept_Callback = prompt_info.Accept or function()end
-            prompt_Reject_Callback = prompt_info.Reject or function()end
-
-            Prompt_Countdown.Text = ""
-            local Countdown = 0
-            if prompt_info.Countdown and tonumber(prompt_info.Countdown) then 
-                Countdown = tonumber(prompt_info.Countdown)
-                Prompt_Countdown.Text = "Time Remaining: "..Countdown.." s"
-                spawn(function()
-                    repeat
-                        WAIT(1)
-                        Countdown = Countdown - 1
-                        Prompt_Countdown.Text = "Time Remaining: "..Countdown.." s"
-                    until Countdown <= 0 or not prompt_Active
-
-                    if (prompt_Active) then
-                        Prompt_Blur.Visible = false
-                        Prompt_Window.Visible = false
-                        prompt_Active = false
-                        Window.Visible = true
-
-                        prompt_Reject_Callback()
-                    end
-                end)
-            end
-
-            Prompt_Body.Text = prompt_info.Text
-            Prompt_Title.Text = "Prompt: "..prompt_info.Name
-
-            Prompt_Blur.Visible = true
-            Prompt_Window.Visible = true
-
-            local prompt_funcs = {}
-
-            function prompt_funcs.GetName()
-                return prompt_info.Name
-            end
-            function prompt_funcs.GetText()
-                return prompt_info.Text
-            end
-            function prompt_funcs.GetTimeLeft()
-                return Countdown
-            end
-            function prompt_funcs.Destroy()
-                Prompt_Blur.Visible = false
-                Prompt_Window.Visible = false
-                prompt_Active = false
-                Window.Visible = true
-
-                prompt_Reject_Callback()
-            end
-
-            return prompt_funcs
-        end
-    end
-
-    do -- NOTIFICATIONS
-        local Notifications_Folder = NEW("Folder")
-        local Container = NEW("Frame")
-        local NotificationLayout = NEW("UIListLayout")
-
-        Notifications_Folder.Name="Notifications"Notifications_Folder.Parent=UI;Container.Name="Container"Container.Parent=Notifications_Folder;Container.BackgroundColor3=RGB(255,255,255)Container.BackgroundTransparency=1.000;Container.BorderSizePixel=0;Container.Position=U2(1,-210,0,-10)Container.Size=U2(0,200,1,0)Container.ZIndex=10000;NotificationLayout.Name="NotificationLayout"NotificationLayout.Parent=Container;NotificationLayout.SortOrder=Enum.SortOrder.LayoutOrder;NotificationLayout.VerticalAlignment=Enum.VerticalAlignment.Bottom;NotificationLayout.Padding=UDim.new(0,5)
-
-        function window.NewNotification(notification_info)
-            notification_info.Title = notification_info.Title or "Notification"
-            notification_info.Body = notification_info.Body or "This is a notification !"
-            notification_info.Time = notification_info.Time or 2 -- Seconds
-
-            local Notification = NEW("Frame")
-            local Notif_Title = NEW("TextLabel")
-            local Border = NEW("Frame")
-            local Body = NEW("TextLabel")
-            local Progress = NEW("Frame")
-
-            Notification.Name="Notification"Notification.Parent=Container;Notification.BackgroundColor3=window.WinTheme.Background;Notification.BorderColor3=window.WinTheme.Dark_Borders;Notification.ClipsDescendants=true;Notification.Size=U2(1,0,0,0)Notification.ZIndex=10001;Notif_Title.Name="Notif_Title"Notif_Title.Parent=Notification;Notif_Title.BackgroundTransparency=1.000;Notif_Title.Position=U2(0,5,0,0)Notif_Title.Size=U2(1,-5,0,20)Notif_Title.ZIndex=10002;Notif_Title.Font=Enum.Font.GothamSemibold;Notif_Title.Text=notification_info.Title;Notif_Title.TextColor3=window.WinTheme.Text_Color;Notif_Title.TextSize=12.000;Notif_Title.TextXAlignment=Enum.TextXAlignment.Left;Border.Name="Border"Border.Parent=Notification;Border.BackgroundColor3=window.WinTheme.Dark_Borders;Border.BorderSizePixel=0;Border.Position=U2(0,0,0,20)Border.Size=U2(1,0,0,1)Border.ZIndex=10002;Body.Name="Body"Body.Parent=Notification;Body.BackgroundColor3=RGB(255,255,255)Body.BackgroundTransparency=1.000;Body.Position=U2(0,5,0,25)Body.Size=U2(1,-10,1,-30)Body.ZIndex=10002;Body.Font=GTHM;Body.Text=notification_info.Body;Body.TextWrapped=true;Body.TextColor3=RGB(255,255,255)Body.TextSize=12.000;Body.TextXAlignment=Enum.TextXAlignment.Left;Body.TextYAlignment=Enum.TextYAlignment.Top;Progress.Name="Progress"Progress.Parent=Notification;Progress.BackgroundColor3=window.WinTheme.Accent;Progress.BorderSizePixel=0;Progress.Position=U2(0,0,1,-1)Progress.Size=U2(0,0,0,1)Progress.ZIndex=10002
-
-            window.NewThemeUpdater({Notification, Notif_Title, Border, Progress}, function()
-                Notification.BackgroundColor3=window.WinTheme.Background;Notification.BorderColor3=window.WinTheme.Dark_Borders;Notif_Title.TextColor3=window.WinTheme.Text_Color;Border.BackgroundColor3=window.WinTheme.Dark_Borders;Progress.BackgroundColor3=window.WinTheme.Accent
-            end)
-
-            --
-            WRAP(function()
-                -- FADE IN
-                do
-                    local Fade = TS:Create(Notification, TWEEN(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),{Size = U2(1, 0, 0, 70)})
-                    Fade:Play()
-                    Fade.Completed:Wait()
-                end
-
-                -- PROGRESS BAR
-                do
-                    local Progress_Tween = TS:Create(
-                        Progress, 
-                        TWEEN(notification_info.Time, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut),
-                        {Size = U2(1, 0, 0, 1)}
-                    )
-        
-                    Progress_Tween:Play()
-                    Progress_Tween.Completed:Wait()
-                end
-    
-                -- FADE OUT
-                do
-                    local Fade = TS:Create(Notification, TWEEN(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),{Size = U2(1, 0, 0, 0)})
-                    Fade:Play()
-                    Fade.Completed:Wait()
-                    Notification:Destroy()
-                end
-            end)()
-        end
-    end
-
-    function window.NewPage(page_info)
-
-        local Page = NEW("ScrollingFrame")
-        local Page_Grid_Layout = NEW("UIGridLayout")
-
-        local Page_Option = NEW("TextButton")
-        local Page_Option_Right = NEW("Frame")
-        local Page_Option_Left = NEW("Frame")
-
-        Page.Name="Page"Page.Parent=Pages;Page.Active=true;Page.BackgroundColor3=RGB(255,255,255)Page.BackgroundTransparency=1.000;Page.BorderColor3=RGB(255,0,4)Page.BorderSizePixel=0;Page.Position=U2(0,5,0,10)Page.Size=U2(1,-10,1,-10)Page.Visible=false;Page.CanvasSize=U2(1,0,20,0)Page.ScrollBarImageColor3=window.WinTheme.Dark_Accent;Page.ScrollBarThickness=1;Page.ScrollingDirection=Enum.ScrollingDirection.Y;Page_Grid_Layout.Name="Page_Grid_Layout"Page_Grid_Layout.Parent=Page;Page_Grid_Layout.FillDirection=Enum.FillDirection.Horizontal;Page_Grid_Layout.SortOrder=SOLO;Page_Grid_Layout.HorizontalAlignment=Enum.HorizontalAlignment.Left;Page_Grid_Layout.CellPadding=U2(0,6,0,6)Page_Grid_Layout.CellSize=U2(0,0,0,0)Page_Option.Name="Page_Option"Page_Option.Parent=Page_Selector;Page_Option.BackgroundColor3=window.WinTheme.Accent;Page_Option.BackgroundTransparency=1;Page_Option.BorderSizePixel=0;Page_Option.ZIndex=10001;Page_Option.AutoButtonColor=false;Page_Option.Font=GTHM;Page_Option.Text=page_info.Text or"Page"Page_Option.TextColor3=window.WinTheme.Text_Color;Page_Option.TextSize=window.WinTheme.Text_Size_Big;Page_Option.Size=U2(0,Page_Option.TextBounds.X+40,1,0)Page_Option_Right.Name="Page_Option_Right"Page_Option_Right.Parent=Page_Option;Page_Option_Right.BackgroundColor3=window.WinTheme.Dark_Borders;Page_Option_Right.BorderSizePixel=0;Page_Option_Right.Position=U2(1,-1,0,4)Page_Option_Right.Size=U2(0,2,1,-8)Page_Option_Right.ZIndex=10002;Page_Option_Left.Name="Page_Option_Left"Page_Option_Left.Parent=Page_Option;Page_Option_Left.BackgroundColor3=window.WinTheme.Dark_Borders;Page_Option_Left.BorderSizePixel=0;Page_Option_Left.Position=U2(0,-1,0,4)Page_Option_Left.Size=U2(0,2,1,-8)Page_Option_Left.ZIndex=10002
-
-        window.NewThemeUpdater({Page, Page_Option, Page_Option_Right, Page_Option_Left}, function()
-            Page.ScrollBarImageColor3=window.WinTheme.Dark_Accent;Page_Option.BackgroundColor3=window.WinTheme.Accent;Page_Option.TextColor3=window.WinTheme.Text_Color;Page_Option.TextSize=window.WinTheme.Text_Size_Big;Page_Option_Right.BackgroundColor3=window.WinTheme.Dark_Borders;Page_Option_Left.BackgroundColor3=window.WinTheme.Dark_Borders
-        end)
-
-        do
-            Page_Option.MouseButton1Click:Connect(function()
-                local t_selector = Page_Selector:GetChildren()
-                for i = 1, #t_selector do
-                    local v = t_selector[i]
-                    if not v:IsA("UIListLayout") then
-                        v.BackgroundTransparency = 1
-                    end
-                end
-                local t_pages = Pages:GetChildren()
-                for i = 1, #t_pages do
-                    t_pages[i].Visible = false
-                end
-                Page.Visible = true
-                Page_Option.BackgroundTransparency = 0.45
-            end)
-    
-            Page_Option.MouseEnter:Connect(function()
-                Page_Option_Right.ZIndex = 10003
-                Page_Option_Left.ZIndex = 10003
-                Page_Option_Left.BackgroundColor3 = window.WinTheme.Accent;
-                Page_Option_Right.BackgroundColor3 = window.WinTheme.Accent;
-                Page_Option.TextColor3 = window.WinTheme.Accent;
-    
-                window.InfoMessage(page_info.Description or "")
-            end)
-        
-            Page_Option.MouseLeave:Connect(function()
-                window.ResetMessage()
-    
-                Page_Option_Right.ZIndex = 10002
-                Page_Option_Left.ZIndex = 10002
-                Page_Option_Left.BackgroundColor3 = window.WinTheme.Dark_Borders
-                Page_Option_Right.BackgroundColor3 = window.WinTheme.Dark_Borders
-                Page_Option.TextColor3 = window.WinTheme.Text_Color;
-            end)
-        end
-
-        local page_funcs = {}
-        function page_funcs.NewSection(section_info)
-            local section_funcs = {}
-
-            local Section = NEW("Frame")
-            local Section_Size = NEW("UISizeConstraint")
-            local Section_Title = NEW("TextLabel")
-            local Item_Container = NEW("Frame")
-            local Section_Item_List = NEW("UIListLayout")
-
-            --Properties:
-            Section.Name="Section"Section.Parent=Page;Section.BackgroundColor3=window.WinTheme.Section_Background;Section.BackgroundTransparency=0;Section.BorderSizePixel=0;Section.BorderMode=Enum.BorderMode.Inset;Section.BorderColor3=window.WinTheme.Dark_Borders;Section.BorderSizePixel=1;Section.Size=U2(0,100,0,100)Section_Size.Name="Section_Size"Section_Size.Parent=Section;Section_Size.MinSize=V2(131,90)Section_Title.Name="Section_Title"Section_Title.Parent=Section;Section_Title.BackgroundColor3=RGB(255,255,255)Section_Title.BackgroundTransparency=1.000;Section_Title.Size=U2(1,0,0,24)Section_Title.Font=GTHM;Section_Title.Text=section_info.Text or"Section"Section_Title.TextColor3=window.WinTheme.Text_Color;Section_Title.TextSize=window.WinTheme.Text_Size_Medium;Item_Container.Name="Item_Container"Item_Container.Parent=Section;Item_Container.BackgroundColor3=RGB(255,255,255)Item_Container.BackgroundTransparency=1.000;Item_Container.Position=U2(0,0,0,24)Item_Container.Size=U2(1,0,1,-24)Section_Item_List.Name="Section_Item_List"Section_Item_List.Parent=Item_Container;Section_Item_List.SortOrder=SOLO;Section_Item_List.Padding=U1(0,8)
-
-            window.NewThemeUpdater({Section, Section_Title}, function()
-                Section.BackgroundColor3=window.WinTheme.Section_Background;Section.BorderColor3=window.WinTheme.Dark_Borders;Section_Title.TextColor3=window.WinTheme.Text_Color;Section_Title.TextSize=window.WinTheme.Text_Size_Medium
-            end)
-
-            local function updateSectionSize()
-                local offsety = 0
-                local offsetx = 0
-                local t_container = Item_Container:GetChildren()
-                for i = 1, #t_container do
-                    local v = t_container[i]
-                    if not v:IsA("UIListLayout") then
-                        offsety = offsety + v.AbsoluteSize.Y + 8
-                        if v.AbsoluteSize.X > offsetx then
-                            offsetx = v.AbsoluteSize.Y
-                        end
-                    end
-                end
-
-                Section_Size.MinSize = V2(160, Section_Title.AbsoluteSize.Y+offsety)
-            end
-            updateSectionSize()
-
-            function section_funcs.NewButton(info)
-                info.Callback = info.Callback or function()end
-                info.Text = info.Text or "Button"
-                info.Description = info.Description or ""
-
-                local Button = NEW("Frame")
-                local Button_Detector = NEW("TextButton")
-
-                Button.Name="Button"Button.Parent=Item_Container;Button.BackgroundColor3=RGB(255,255,255)Button.BackgroundTransparency=1.000;Button.BorderSizePixel=0;Button.Size=U2(1,-10,0,16)Button_Detector.Name="Button_Detector"Button_Detector.Parent=Button;Button_Detector.BackgroundColor3=RGB(0,0,0)Button_Detector.AutoButtonColor=false;Button_Detector.BorderColor3=window.WinTheme.Light_Borders;Button_Detector.Position=U2(0,5,0,0)Button_Detector.Size=U2(1,0,1,0)Button_Detector.Font=GTHM;Button_Detector.TextColor3=window.WinTheme.Text_Color;Button_Detector.Text=info.Text or"Button"Button_Detector.TextSize=window.WinTheme.Text_Size_Medium;Button_Detector.TextWrapped=true
-
-                window.NewThemeUpdater({Button_Detector}, function()
-                    Button_Detector.BorderColor3=window.WinTheme.Light_Borders;Button_Detector.TextColor3=window.WinTheme.Text_Color;Button_Detector.TextSize=window.WinTheme.Text_Size_Medium
-                end)
-
-                Button_Detector.MouseButton1Click:Connect(function()
-                    info.Callback()
-                end)
-
-                Button_Detector.MouseEnter:Connect(function()
-                    Button_Detector.BorderColor3 = window.WinTheme.Accent;
-                    Button_Detector.TextColor3 = window.WinTheme.Accent;
-        
-                    window.InfoMessage(info.Description or "")
-                end)
-            
-                Button_Detector.MouseLeave:Connect(function()
-                    window.ResetMessage()
-        
-                    Button_Detector.BorderColor3 = window.WinTheme.Light_Borders;
-                    Button_Detector.TextColor3 = window.WinTheme.Text_Color;
-                end)
-
-                updateSectionSize()
-
-                local button_funcs = {}
-
-                function button_funcs.Fire(times)
-                    for i = 1, times or 1 do
-                        info.Callback()
-                    end
-                end
-
-                function button_funcs.SetText(text)
-                    Button_Detector.Text = text or "Button"
-                end
-                function button_funcs.GetText()
-                    return Button_Detector.Text
-                end
-
-                function button_funcs.ReplaceCallback(newfunc)
-                    info.Callback = newfunc
-                end
-
-                return button_funcs
-            end
-
-            function section_funcs.NewToggle(info)
-                local isToggled = info.Default or false
-                info.Callback = info.Callback or function()end
-                info.Text = info.Text or "Toggle"
-                info.Description = info.Description or ""
-
-                local Toggle = NEW("Frame")
-                local Toggle_Detector = NEW("ImageButton")
-                local Toggle_Right = NEW("Frame")
-                local Toggle_Left = NEW("Frame")
-                local Toggle_Title = NEW("TextLabel")
-
-                Toggle.Name="Toggle"Toggle.Parent=Item_Container;Toggle.BackgroundColor3=RGB(255,255,255)Toggle.BackgroundTransparency=1.000;Toggle.BorderSizePixel=0;Toggle.Size=U2(0,120,0,16)Toggle_Detector.Name="Toggle_Detector"Toggle_Detector.Parent=Toggle;Toggle_Detector.BackgroundColor3=RGB(0,0,0)Toggle_Detector.BorderColor3=window.WinTheme.Light_Borders;Toggle_Detector.Position=U2(0,5,0,0)Toggle_Detector.Size=U2(0,16,0,16)Toggle_Detector.AutoButtonColor=false;Toggle_Detector.Image="rbxassetid://7248316188"Toggle_Detector.ImageColor3=window.WinTheme.Accent;Toggle_Right.Name="Toggle_Right"Toggle_Right.Parent=Toggle_Detector;Toggle_Right.BackgroundColor3=RGB(0,0,0)Toggle_Right.BorderSizePixel=0;Toggle_Right.Position=U2(1,-2,0,0)Toggle_Right.Size=U2(0,2,1,0)Toggle_Left.Name="Toggle_Left"Toggle_Left.Parent=Toggle_Detector;Toggle_Left.BackgroundColor3=RGB(0,0,0)Toggle_Left.BorderSizePixel=0;Toggle_Left.Size=U2(0,2,1,0)Toggle_Title.Name="Toggle_Title"Toggle_Title.Parent=Toggle;Toggle_Title.BackgroundColor3=RGB(255,255,255)Toggle_Title.BackgroundTransparency=1.000;Toggle_Title.Position=U2(0,31,0,0)Toggle_Title.Size=U2(0,1,1,0)Toggle_Title.Font=GTHM;Toggle_Title.Text=info.Text or"Toggle"Toggle_Title.TextColor3=window.WinTheme.Text_Color;Toggle_Title.TextSize=window.WinTheme.Text_Size_Medium;Toggle_Title.TextXAlignment=TXAL
-
-                window.NewThemeUpdater({Toggle_Detector, Toggle_Title}, function()
-                    Toggle_Detector.BorderColor3=window.WinTheme.Light_Borders;Toggle_Detector.ImageColor3=window.WinTheme.Accent;Toggle_Title.TextColor3=window.WinTheme.Text_Color;Toggle_Title.TextSize=window.WinTheme.Text_Size_Medium
-                end)
-
-                if isToggled then
-                    Toggle_Detector.ImageTransparency = 0
-                else
-                    Toggle_Detector.ImageTransparency = 1
-                end
-
-                Toggle_Detector.MouseButton1Click:Connect(function()
-
-                    isToggled = not isToggled
-
-                    if isToggled then
-                        Toggle_Detector.ImageTransparency = 0
-                    else
-                        Toggle_Detector.ImageTransparency = 1
-                    end
-
-                    info.Callback(isToggled)
-                end)
-
-                Toggle_Detector.MouseEnter:Connect(function()
-                    Toggle_Detector.BorderColor3 = window.WinTheme.Accent;
-        
-                    window.InfoMessage(info.Description or "")
-                end)
-            
-                Toggle_Detector.MouseLeave:Connect(function()
-                    window.ResetMessage()
-        
-                    Toggle_Detector.BorderColor3 = window.WinTheme.Light_Borders;
-                end)
-
-                updateSectionSize()
-
-                local toggle_funcs = {}
-                function toggle_funcs.Toggle(state)
-                    isToggled = state or not isToggled
-
-                    if isToggled then
-                        Toggle_Detector.ImageTransparency = 0
-                    else
-                        Toggle_Detector.ImageTransparency = 1
-                    end
-
-                    info.Callback(isToggled)
-                end
-                function toggle_funcs.SetText(text)
-                    Toggle_Title.Text = text or "Toggle"
-                end
-                function toggle_funcs.GetText()
-                    return Toggle_Title.Text
-                end
-
-                function toggle_funcs.GetState()
-                    return isToggled
-                end
-
-                function toggle_funcs.ReplaceCallback(newfunc)
-                    info.Callback = newfunc
-                end
-
-                return toggle_funcs
-            end
-
-            function section_funcs.NewTextBox(info)
-                info.Callback = info.Callback or function()end
-                info.Default = info.Default or ""
-                info.Text = info.Text or "Text Box"
-                info.PlaceHolderText = info.PlaceHolderText or "Type..."
-                info.Description = info.Description or ""
-
-                info.OnlyAlphabetic = info.OnlyAlphabetic or false
-                info.OnlyNumeric = info.OnlyNumeric or false
-
-                local TextBox = NEW("Frame")
-                local TextBox_Title = NEW("TextLabel")
-                local TextBox_Detector = NEW("TextBox")
-
-                TextBox.Name="TextBox"TextBox.Parent=Item_Container;TextBox.BackgroundColor3=RGB(255,255,255)TextBox.BackgroundTransparency=1.000;TextBox.BorderSizePixel=0;TextBox.Size=U2(1,0,0,16)TextBox_Title.Name="TextBox_Title"TextBox_Title.Parent=TextBox;TextBox_Title.BackgroundColor3=RGB(255,255,255)TextBox_Title.BackgroundTransparency=1.000;TextBox_Title.Position=U2(0,5,0,0)TextBox_Title.Size=U2(0,1,1,0)TextBox_Title.Font=GTHM;TextBox_Title.Text=info.Text;TextBox_Title.TextColor3=window.WinTheme.Text_Color;TextBox_Title.TextSize=window.WinTheme.Text_Size_Medium;TextBox_Title.TextXAlignment=TXAL;TextBox_Detector.Name="TextBox_Detector"TextBox_Detector.Parent=TextBox;TextBox_Detector.BackgroundColor3=RGB(0,0,0)TextBox_Detector.BorderColor3=window.WinTheme.Light_Borders;TextBox_Detector.Position=U2(1,-51,0,0)TextBox_Detector.Size=U2(0,46,1,0)TextBox_Detector.Font=GTHM;TextBox_Detector.PlaceholderColor3=RGB(178,178,178)TextBox_Detector.PlaceholderText=info.PlaceHolderText;TextBox_Detector.Text=info.Default;TextBox_Detector.TextColor3=window.WinTheme.Text_Color;TextBox_Detector.TextSize=window.WinTheme.Text_Size_Small;TextBox_Detector.ClearTextOnFocus=false;TextBox_Detector.MultiLine=false;TextBox_Detector.ClipsDescendants=true
-
-                window.NewThemeUpdater({TextBox_Title, TextBox_Detector}, function()
-                    TextBox_Title.TextColor3=window.WinTheme.Text_Color;TextBox_Title.TextSize=window.WinTheme.Text_Size_Medium;TextBox_Detector.BorderColor3=window.WinTheme.Light_Borders;TextBox_Detector.TextColor3=window.WinTheme.Text_Color;TextBox_Detector.TextSize=window.WinTheme.Text_Size_Small
-                end)
-
-                updateSectionSize()
-
-                TextBox_Detector.MouseEnter:Connect(function()
-                    TextBox_Detector.BorderColor3 = window.WinTheme.Accent;
-                    TextBox_Detector.TextColor3 = window.WinTheme.Accent;
-        
-                    window.InfoMessage(info.Description or "")
-                end)
-            
-                TextBox_Detector.MouseLeave:Connect(function()
-                    window.ResetMessage()
-        
-                    TextBox_Detector.BorderColor3 = window.WinTheme.Light_Borders;
-                    TextBox_Detector.TextColor3 = window.WinTheme.Text_Color;
-                end)
-
-                TextBox_Detector.FocusLost:Connect(function()
-                    local parsed = ""
-
-                    if info.OnlyAlphabetic or info.OnlyNumeric then
-                        for i = 1, #(TextBox_Detector.Text) do
-                            local l = SUB(TextBox_Detector.Text, i, i)
-                            if (info.OnlyNumeric and l:find("%d")) then
-                                parsed = parsed .. l
-                            elseif (info.OnlyAlphabetic and l:find("%a")) then
-                                parsed = parsed .. l
-                            end
-                        end
-                    else 
-                        parsed = TextBox_Detector.Text
-                    end
-
-                    TextBox_Detector.Text = parsed
-
-                    if #parsed ~= 0 then info.Callback(parsed) end
-                end)
-
-
-                local text_box_funcs = {}
-
-                function text_box_funcs.GetText()
-                    return TextBox_Title.Text
-                end
-                function text_box_funcs.SetText(text)
-                    TextBox_Title = text
-                end
-
-                function text_box_funcs.GetInput()
-                    return TextBox_Detector.Text
-                end
-                function text_box_funcs.SetInput(text)
-                    TextBox_Detector.Text = text
-                end
-
-                function text_box_funcs.ReplaceCallback(newfunc)
-                    info.Callback = newfunc
-                end
-
-                return text_box_funcs
-            end
-
-            function section_funcs.NewSlider(info)
-                info.Callback = info.Callback or function()end
-                info.Default = info.Default or 0
-                info.Text = info.Text or "Slider"
-                info.Description = info.Description or ""
-
-                local decimals = info.Decimals or 0
-                local function RoundValue(val)
-                    if decimals >= 1 then
-                        local str = "1"
-                        for i = 1, decimals do 
-                            str = str.."0"
-                        end
-                        return ROUND(val * tonumber(str))/tonumber(str)
-                    else
-                        return ROUND(val)
-                    end
-                end
-
-                local suffix = info.Suffix or ""
-                local current_value = RoundValue(info.Default or ((info.Min + info.Max)/2))
-
-                local Slider = NEW("Frame")
-                local Slider_Detector = NEW("TextButton")
-                local Fill = NEW("Frame")
-                local Value = NEW("TextLabel")
-                local Slider_Title = NEW("TextLabel")
-
-                Slider.Name="Slider"Slider.Parent=Item_Container;Slider.BackgroundColor3=RGB(255,255,255)Slider.BackgroundTransparency=1.000;Slider.BorderSizePixel=0;Slider.Size=U2(1,0,0,33)Slider_Detector.Name="Slider_Detector"Slider_Detector.Parent=Slider;Slider_Detector.BackgroundColor3=RGB(0,0,0)Slider_Detector.BorderColor3=window.WinTheme.Light_Borders;Slider_Detector.Position=U2(0,5,0,17)Slider_Detector.Size=U2(1,-10,0,16)Slider_Detector.AutoButtonColor=false;Slider_Detector.Font=GTHM;Slider_Detector.Text=""Slider_Detector.TextColor3=window.WinTheme.Text_Color;Slider_Detector.TextSize=window.WinTheme.Text_Size_Medium;Slider_Detector.TextWrapped=true;Fill.Name="Fill"Fill.Parent=Slider_Detector;Fill.BackgroundColor3=RGB(65,65,65)Fill.BorderSizePixel=0;Fill.Size=U2(0,100,1,0)Value.Name="Value"Value.Parent=Slider_Detector;Value.BackgroundColor3=RGB(255,255,255)Value.BackgroundTransparency=1.000;Value.Size=U2(1,0,1,0)Value.Font=GTHM;Value.TextColor3=window.WinTheme.Text_Color;Value.TextSize=window.WinTheme.Text_Size_Small;Value.TextWrapped=true;Value.Text=current_value..tostring(suffix)Slider_Title.Name="Slider_Title"Slider_Title.Parent=Slider;Slider_Title.BackgroundColor3=RGB(255,255,255)Slider_Title.BackgroundTransparency=1.000;Slider_Title.Position=U2(0,5,0,0)Slider_Title.Size=U2(0,1,0,16)Slider_Title.Font=GTHM;Slider_Title.Text=info.Text or"Slider"Slider_Title.TextColor3=window.WinTheme.Text_Color;Slider_Title.TextSize=window.WinTheme.Text_Size_Medium;Slider_Title.TextXAlignment=TXAL
-
-                window.NewThemeUpdater({Slider_Detector, Value, Slider_Title}, function()
-                    Slider_Detector.BorderColor3=window.WinTheme.Light_Borders;Slider_Detector.TextColor3=window.WinTheme.Text_Color;Slider_Detector.TextSize=window.WinTheme.Text_Size_Medium;Value.TextColor3=window.WinTheme.Text_Color;Value.TextSize=window.WinTheme.Text_Size_Small;Slider_Title.TextColor3=window.WinTheme.Text_Color;Slider_Title.TextSize=window.WinTheme.Text_Size_Medium
-                end)
-
-                local Dragging = false
-                local slider_connection
-                local RS_ID = "Slider_"..random_string(10)
-
-                Slider_Detector.MouseEnter:Connect(function()
-                    if not Dragging then
-                        Slider_Detector.BorderColor3 = window.WinTheme.Accent;
-                        Value.TextColor3 = window.WinTheme.Accent;
-
-                        Custom_Cursor.Show_Custom_Cursor(HorizontalSizeId)
-                    end
-        
-                    window.InfoMessage(info.Description or "")
-                end)
-
-                Slider_Detector.MouseLeave:Connect(function()
-                    if not Dragging then
-                        Slider_Detector.BorderColor3 = window.WinTheme.Light_Borders;
-                        Value.TextColor3 = window.WinTheme.Text_Color;
-
-                        Custom_Cursor.Hide_Custom_Cursor()
-                    end
-
-                    window.ResetMessage()
-                end)
-
-                Slider_Detector.MouseButton1Down:Connect(function()
-                    Dragging = true
-                    RS:BindToRenderStep(RS_ID, 1, slider_connection)
-                end)
-
-                local c_up; c_up = UIS.InputEnded:Connect(function(input)
-                    if DESTROY_UI then
-                        c_up:Disconnect()
-                    elseif input.UserInputType == MB1 then
-                        if MouseIn(Slider_Detector) then
-                            Slider_Detector.BorderColor3 = window.WinTheme.Accent;
-                            Value.TextColor3 = window.WinTheme.Accent;
-                            Custom_Cursor.Show_Custom_Cursor(HorizontalSizeId)
-                        else
-                            Slider_Detector.BorderColor3 = window.WinTheme.Light_Borders;
-                            Value.TextColor3 = window.WinTheme.Text_Color;
-                            Custom_Cursor.Hide_Custom_Cursor()
-                        end
-                        Dragging = false
-                        RS:UnbindFromRenderStep(RS_ID)
-                    end
-                end)
-
-                local min = info.Min
-                local max = info.Max
-                local difference = max - min
-
-                local function PlaceValue(val)
-                    local newval = CLAMP(val, min, max)
-                    local SASX = Slider_Detector.AbsoluteSize.X
-                    local SAPX = Slider_Detector.AbsolutePosition.X
-                    local offset = (newval - min) * SASX / difference
-                    if Value.Text ~= tostring(newval)..tostring(suffix) then
-                        Value.Text = tostring(newval)..tostring(suffix)
-                    end
-                    Fill.Size = U2(0, CLAMP(offset, 0, SASX), 1, 0)
-                end
-
-                PlaceValue(current_value)
-
-                local previous_value = nil
-                slider_connection = function()
-                    if DESTROY_UI then
-                        RS:UnbindFromRenderStep(RS_ID)
-                    elseif Dragging then
-                        local SASX = Slider_Detector.AbsoluteSize.X
-                        local SAPX = Slider_Detector.AbsolutePosition.X
-
-                        -- PLACING
-                        local offset = Mouse.X - SAPX
-                        local new_x = CLAMP(offset, 0, SASX)
-                        
-                        -- CALCULATIONS
-                        if decimals >= 1 then
-                            local str = "1"
-                            for i = 1, decimals do 
-                                str = str.."0"
-                            end
-                            current_value = RoundValue(new_x * difference / SASX + min)
-                        else
-                            current_value = RoundValue(new_x * difference / SASX + min)
-                        end
-
-                        if previous_value ~= current_value then
-                            info.Callback(current_value)
-                            previous_value = current_value
-                        end
-                        PlaceValue(current_value)
-                    else
-                        PlaceValue(current_value)
-                    end
-                end
-
-                updateSectionSize()
-
-                local slider_funcs = {}
-
-                function slider_funcs.SetValue(val)
-                    current_value = CLAMP(val, min, max)
-                    info.Callback(current_value)
-                    PlaceValue(current_value)
-                end
-                function slider_funcs.GetValue()
-                    return current_value
-                end
-
-                function slider_funcs.SetText(text)
-                    Slider_Title.Text = text or "Slider"
-                end
-                function slider_funcs.GetText()
-                    return Slider_Title.Text
-                end
-
-                function slider_funcs.ReplaceCallback(newfunc)
-                    info.Callback = newfunc
-                end
-
-                return slider_funcs
-            end
-
-            function section_funcs.NewDropdown(info)
-                info.Callback = info.Callback or function()end
-                info.Options = info.Options or {}
-                info.Default = info.Default or 1
-                info.Text = info.Text or "Dropdown"
-                info.Description = info.Description or ""
-
-                local Dropdown = NEW("Frame")
-                local Dropdown_Detector = NEW("TextButton")
-                local Fill = NEW("Frame")
-                local Current_Option = NEW("TextLabel")
-                local Options_Container = NEW("Frame")
-
-                local Options_List = NEW("UIListLayout")
-                local Dropdown_Title = NEW("TextLabel")
-
-                Dropdown.Name="Dropdown"Dropdown.Parent=Item_Container;Dropdown.BackgroundColor3=RGB(255,255,255)Dropdown.BackgroundTransparency=1.000;Dropdown.BorderSizePixel=0;Dropdown.Size=U2(1,0,0,33)Dropdown_Detector.Name="Dropdown_Detector"Dropdown_Detector.Parent=Dropdown;Dropdown_Detector.BackgroundColor3=RGB(0,0,0)Dropdown_Detector.BorderColor3=window.WinTheme.Light_Borders;Dropdown_Detector.Position=U2(0,5,0,17)Dropdown_Detector.Size=U2(1,-10,0,16)Dropdown_Detector.AutoButtonColor=false;Dropdown_Detector.Font=GTHM;Dropdown_Detector.Text=""Dropdown_Detector.TextColor3=window.WinTheme.Text_Color;Dropdown_Detector.TextSize=window.WinTheme.Text_Size_Medium;Dropdown_Detector.TextWrapped=true;Fill.Name="Fill"Fill.Parent=Dropdown_Detector;Fill.BackgroundColor3=RGB(242,239,255)Fill.BorderSizePixel=0;Fill.Position=U2(1,-6,0,0)Fill.Size=U2(0,6,1,0)Current_Option.Name="Current_Option"Current_Option.Parent=Dropdown_Detector;Current_Option.BackgroundColor3=RGB(255,255,255)Current_Option.BackgroundTransparency=1.000;Current_Option.Position=U2(0,5,0,0)Current_Option.Size=U2(0,1,1,0)Current_Option.Font=GTHM;Current_Option.Text=info.Options[info.Default]or"None"Current_Option.TextColor3=window.WinTheme.Text_Color;Current_Option.TextSize=window.WinTheme.Text_Size_Small;Current_Option.TextXAlignment=TXAL;Options_Container.Name="Options_Container"Options_Container.Parent=Dropdown_Detector;Options_Container.BackgroundColor3=RGB(255,255,255)Options_Container.BackgroundTransparency=1.000;Options_Container.Position=U2(0,0,1,8)Options_Container.Visible=false;Options_Container.Size=U2(1,-6,1,0)Options_List.Parent=Options_Container;Options_List.SortOrder=SOLO;Options_List.Padding=U1(0,1)Dropdown_Title.Name="Dropdown_Title"Dropdown_Title.Parent=Dropdown;Dropdown_Title.BackgroundColor3=RGB(255,255,255)Dropdown_Title.BackgroundTransparency=1.000;Dropdown_Title.Position=U2(0,5,0,0)Dropdown_Title.Size=U2(0,1,0,16)Dropdown_Title.Font=GTHM;Dropdown_Title.Text=info.Text or"Dropdown"Dropdown_Title.TextColor3=window.WinTheme.Text_Color;Dropdown_Title.TextSize=window.WinTheme.Text_Size_Medium;Dropdown_Title.TextXAlignment=TXAL
-
-                window.NewThemeUpdater({Dropdown_Detector, Current_Option, Dropdown_Title}, function()
-                    Dropdown_Detector.BorderColor3=window.WinTheme.Light_Borders;Dropdown_Detector.TextColor3=window.WinTheme.Text_Color;Dropdown_Detector.TextSize=window.WinTheme.Text_Size_Medium;Current_Option.TextColor3=window.WinTheme.Text_Color;Current_Option.TextSize=window.WinTheme.Text_Size_Small;Dropdown_Title.TextColor3=window.WinTheme.Text_Color;Dropdown_Title.TextSize=window.WinTheme.Text_Size_Medium
-                end)
-
-                local previous_option
-                Dropdown_Detector.MouseButton1Click:Connect(function()
-                    Options_Container.Visible = not Options_Container.Visible
-
-                    if Options_Container.Visible then
-                        previous_option = Current_Option.Text
-                        Current_Option.Text = "Selecting..."
-                    else
-                        Current_Option.Text = previous_option
-                    end
-                end)
-
-                Dropdown_Detector.MouseEnter:Connect(function()
-                    Dropdown_Detector.BorderColor3 = window.WinTheme.Accent;
-                    Current_Option.TextColor3 = window.WinTheme.Accent;
-        
-                    window.InfoMessage(info.Description or "")
-                end)
-            
-                Dropdown_Detector.MouseLeave:Connect(function()
-                    window.ResetMessage()
-        
-                    Dropdown_Detector.BorderColor3 = window.WinTheme.Light_Borders;
-                    Current_Option.TextColor3 = window.WinTheme.Text_Color;
-                end)
-
-                local function addOption(v)
-                    local Option = NEW("TextButton")
-                    local Option_Title = NEW("TextLabel")
-
-                    Option.Name="Option"Option.Parent=Options_Container;Option.BackgroundColor3=RGB(0,0,0)Option.BorderColor3=RGB(10,10,10)Option.Size=U2(1,0,0,16)Option.ZIndex=10;Option.AutoButtonColor=false;Option.Font=GTHM;Option.Text=""Option.TextColor3=RGB(0,0,0)Option.TextSize=window.WinTheme.Text_Size_Medium;Option_Title.Name="Option_Title"Option_Title.Parent=Option;Option_Title.BackgroundColor3=RGB(255,255,255)Option_Title.BackgroundTransparency=1.000;Option_Title.Position=U2(0,5,0,0)Option_Title.Size=U2(0,1,1,0)Option_Title.ZIndex=11;Option_Title.Font=GTHM;Option_Title.Text=v or"Option"Option_Title.TextColor3=window.WinTheme.Text_Color;Option_Title.TextSize=window.WinTheme.Text_Size_Small;Option_Title.TextXAlignment=TXAL
-
-                    window.NewThemeUpdater({Option, Option_Title}, function()
-                        Option.TextSize=window.WinTheme.Text_Size_Medium;Option_Title.TextColor3=window.WinTheme.Text_Color;Option_Title.TextSize=window.WinTheme.Text_Size_Small
-                    end)
-
-                    Option.MouseButton1Click:Connect(function()
-                        Current_Option.Text = v
-                        Options_Container.Visible = false
-                        info.Callback(v)
-                    end)
-    
-                    Option.MouseEnter:Connect(function()
-                        Option.ZIndex = 12
-                        Option_Title.ZIndex = 13
-
-                        Option.BorderColor3 = window.WinTheme.Accent;
-                        Option_Title.TextColor3 = window.WinTheme.Accent;
-
-                        window.InfoMessage(info.Description or "")
-                    end)
-                
-                    Option.MouseLeave:Connect(function()
-                        window.ResetMessage()
-
-                        Option.ZIndex = 10
-                        Option_Title.ZIndex = 11
-
-                        Option.BorderColor3 = RGB(10, 10, 10)
-                        Option_Title.TextColor3 = window.WinTheme.Text_Color;
-                    end)
-                end
-
-                for i,v in pairs(info.Options) do
-                    addOption(v)
-                end
-
-                updateSectionSize()
-
-                local dropdown_funcs = {}
-
-                function dropdown_funcs.SetOption(option)
-                    Current_Option.Text = option
-                    Options_Container.Visible = false
-                    info.Callback(option)
-                end
-                function dropdown_funcs.GetCurrent()
-                    return Current_Option.Text
-                end
-                function dropdown_funcs.AddOption(option)
-                    addOption(option)
-                end
-
-                function dropdown_funcs.ReplaceCallback(newfunc)
-                    info.Callback = newfunc
-                end
-
-                return dropdown_funcs
-            end
-
-            function section_funcs.NewKeybind(info)
-                info.Callback = info.Callback or function()end
-                info.KeyCallback = info.KeyCallback or function()end
-                info.Default = info.Default or nil
-                info.Text = info.Text or "Keybind"
-                info.Description = info.Description or ""
-
-                local Keybind = NEW("Frame")
-                local Keybind_Detector = NEW("TextButton")
-                local Fill = NEW("Frame")
-                local Current_Keybind = NEW("TextLabel")
-                local Keybind_Title = NEW("TextLabel")
-
-                Keybind.Name="Keybind"Keybind.Parent=Item_Container;Keybind.BackgroundColor3=RGB(255,255,255)Keybind.BackgroundTransparency=1.000;Keybind.BorderSizePixel=0;Keybind.Size=U2(1,0,0,33)Keybind_Detector.Name="Keybind_Detector"Keybind_Detector.Parent=Keybind;Keybind_Detector.BackgroundColor3=RGB(0,0,0)Keybind_Detector.BorderColor3=window.WinTheme.Light_Borders;Keybind_Detector.Position=U2(0,5,0,17)Keybind_Detector.Size=U2(1,-10,0,16)Keybind_Detector.AutoButtonColor=false;Keybind_Detector.Font=GTHM;Keybind_Detector.Text=""Keybind_Detector.TextColor3=window.WinTheme.Text_Color;Keybind_Detector.TextSize=window.WinTheme.Text_Size_Medium;Keybind_Detector.TextWrapped=true;Fill.Name="Fill"Fill.Parent=Keybind_Detector;Fill.BackgroundColor3=RGB(242,239,255)Fill.BorderSizePixel=0;Fill.Position=U2(1,-6,0,0)Fill.Size=U2(0,6,1,0)Current_Keybind.Name="Current_Keybind"Current_Keybind.Parent=Keybind_Detector;Current_Keybind.BackgroundColor3=RGB(255,255,255)Current_Keybind.BackgroundTransparency=1.000;Current_Keybind.Position=U2(0,5,0,0)Current_Keybind.Size=U2(0,1,1,0)Current_Keybind.Font=GTHM;Current_Keybind.TextColor3=window.WinTheme.Text_Color;Current_Keybind.TextSize=window.WinTheme.Text_Size_Small;Current_Keybind.TextXAlignment=TXAL;Keybind_Title.Name="Keybind_Title"Keybind_Title.Parent=Keybind;Keybind_Title.BackgroundColor3=RGB(255,255,255)Keybind_Title.BackgroundTransparency=1.000;Keybind_Title.Position=U2(0,5,0,0)Keybind_Title.Size=U2(0,1,0,16)Keybind_Title.Font=GTHM;Keybind_Title.Text=info.Text or"Keybind"Keybind_Title.TextColor3=window.WinTheme.Text_Color;Keybind_Title.TextSize=window.WinTheme.Text_Size_Medium;Keybind_Title.TextXAlignment=TXAL
-
-                window.NewThemeUpdater({Keybind_Detector, Current_Keybind, Keybind_Title}, function()
-                    Keybind_Detector.BorderColor3=window.WinTheme.Light_Borders;Keybind_Detector.TextColor3=window.WinTheme.Text_Color;Keybind_Detector.TextSize=window.WinTheme.Text_Size_Medium;Current_Keybind.TextColor3=window.WinTheme.Text_Color;Current_Keybind.TextSize=window.WinTheme.Text_Size_Small;Keybind_Title.TextColor3 = window.WinTheme.Text_Color;Keybind_Title.TextSize = window.WinTheme.Text_Size_Medium;
-                end)
-
-                local Current = info.Default
-                local function setKeybind(new)
-                    Current = new
-                    if not Current then
-                        Current_Keybind.Text = "None"
-                    else
-                        Current_Keybind.Text = SUB(tostring(Current), 14, #tostring(Current)) 
-                    end
-                    info.KeyCallback(Current) 
-                end
-                setKeybind(Current)
-
-                local Binding = false
-                local function startSelection()
-                    if not Binding then
-                        Binding = true
-                        
-                        setKeybind(nil)
-
-                        Current_Keybind.Text = "Binding..."
-
-                        local set_c
-                        local del_c
-
-                        set_c = UIS.InputBegan:Connect(function(input, gameProcessed)
-                            if DESTROY_UI then
-                                set_c:Disconnect()
-                            elseif not gameProcessed and input.UserInputType == KBD and input.KeyCode ~= BSP and input.KeyCode ~= DLT then
-                                setKeybind(input.KeyCode)
-                                set_c:Disconnect()
-                                del_c:Disconnect()
-                                RStepped:Wait()
-                                Binding = false
-                            end
-                        end)
-                        del_c = UIS.InputBegan:Connect(function(input, gameProcessed)
-                            if DESTROY_UI then
-                                del_c:Disconnect()
-                            elseif not gameProcessed and ((input.UserInputType == KBD and (input.KeyCode == BSP or input.KeyCode == DLT)) or (not MouseIn(Keybind_Detector) and input.UserInputType == MB2)) then
-                                setKeybind(nil)
-                                set_c:Disconnect()
-                                del_c:Disconnect()
-                                RStepped:Wait()
-                                Binding = false
-                            end
-                        end)
-                    end
-                end
-
-                local c_press
-                c_press = UIS.InputBegan:Connect(function(input, gameProcessed)
-                    if DESTROY_UI then
-                        c_press:Disconnect()
-                    elseif not gameProcessed and input.UserInputType == KBD and input.KeyCode == Current and Binding == false then
-                        info.Callback()
-                    end
-                end)
-
-                Keybind_Detector.MouseButton1Click:Connect(function()
-                    startSelection()
-                end)
-
-                Keybind_Detector.MouseEnter:Connect(function()
-                    Keybind_Detector.BorderColor3 = window.WinTheme.Accent;
-                    Current_Keybind.TextColor3 = window.WinTheme.Accent;
-        
-                    window.InfoMessage(info.Description or "")
-                end)
-            
-                Keybind_Detector.MouseLeave:Connect(function()
-                    window.ResetMessage()
-        
-                    Keybind_Detector.BorderColor3 = window.WinTheme.Light_Borders;
-                    Current_Keybind.TextColor3 = window.WinTheme.Text_Color;
-                end)
-
-                updateSectionSize()
-
-                local keybind_funcs = {}
-
-                function keybind_funcs.SetKey(key)
-                    setKeybind(key)
-                end
-                function keybind_funcs.GetKey()
-                    return Current
-                end
-
-                function keybind_funcs.SetText(text)
-                    Keybind_Title.Text = text
-                end
-                function keybind_funcs.GetText()
-                    return Keybind_Title.Text
-                end
-
-                function keybind_funcs.ReplaceCallback(newfunc)
-                    info.Callback = newfunc
-                end
-
-                return keybind_funcs
-            end
-
-            function section_funcs.NewColorPicker(info)
-                info.Callback = info.Callback or function()end
-                info.Default = info.Default or RGB(255, 255, 255)
-                info.Text = info.Text or "Colorpicker"
-                info.Description = info.Description or ""
-
-                local bindName = "CPBinding"..random_string(10)
-                
-                -- ITEM
-                local Colorpicker = NEW("Frame")
-                local Colorpicker_Title = NEW("TextLabel")
-                local Colorpicker_Detector = NEW("ImageButton")
-                local Detector_Gradient = NEW("UIGradient")
-
-                Colorpicker.Name="Colorpicker"Colorpicker.Parent=Item_Container;Colorpicker.BackgroundColor3=RGB(255,255,255)Colorpicker.BackgroundTransparency=1.000;Colorpicker.BorderSizePixel=0;Colorpicker.Size=U2(1,0,0,16)Colorpicker_Title.Name="Colorpicker_Title"Colorpicker_Title.Parent=Colorpicker;Colorpicker_Title.BackgroundColor3=RGB(255,255,255)Colorpicker_Title.BackgroundTransparency=1.000;Colorpicker_Title.Position=U2(0,5,0,0)Colorpicker_Title.Size=U2(0,1,1,0)Colorpicker_Title.Font=GTHM;Colorpicker_Title.Text=info.Text or"Color"Colorpicker_Title.TextColor3=window.WinTheme.Text_Color;Colorpicker_Title.TextSize=window.WinTheme.Text_Size_Medium;Colorpicker_Title.TextXAlignment=TXAL;Colorpicker_Detector.Name="Colorpicker_Detector"Colorpicker_Detector.Parent=Colorpicker;Colorpicker_Detector.BackgroundColor3=RGB(0,0,0)Colorpicker_Detector.BorderColor3=window.WinTheme.Light_Borders;Colorpicker_Detector.Position=U2(1,-23,0.5,-6)Colorpicker_Detector.Size=U2(0,18,0,12)Colorpicker_Detector.AutoButtonColor=false;Colorpicker_Detector.ImageTransparency=1.000;Detector_Gradient.Color=COLOR_SEQUENCE{COLOR_KEYPOINT(0.00,RGB(255,255,255)),COLOR_KEYPOINT(0.54,RGB(225,225,225)),COLOR_KEYPOINT(1.00,RGB(125,125,125))}Detector_Gradient.Rotation=90;Detector_Gradient.Name="Detector_Gradient"Detector_Gradient.Parent=Colorpicker_Detector
-
-                window.NewThemeUpdater({Colorpicker_Title, Colorpicker_Detector}, function()
-                    Colorpicker_Title.TextColor3 = window.WinTheme.Text_Color;Colorpicker_Title.TextSize = window.WinTheme.Text_Size_Medium;Colorpicker_Detector.BorderColor3 = window.WinTheme.Light_Borders;
-                end)
-
-                -- PICKER WINDOW
-                local Picker = NEW("Frame")
-                local Picker_Title = NEW("TextLabel")
-                local Picker_Close = NEW("ImageButton")
-                local Picker_Close_Left = NEW("Frame")
-                local Picker_Close_Right = NEW("Frame")
-                local Picker_Main = NEW("Frame")
-                local HSVBox = NEW("ImageButton")
-                local Cursor = NEW("Frame")
-                local HUEPicker = NEW("ImageButton")
-                local Indicator = NEW("Frame")
-                local HUEGradient = NEW("UIGradient")
-                local R_Box = NEW("Frame")
-                local R_Value = NEW("TextBox")
-                local R_Fill = NEW("Frame")
-                local G_Box = NEW("Frame")
-                local G_Value = NEW("TextBox")
-                local G_Fill = NEW("Frame")
-                local B_Box = NEW("Frame")
-                local B_Value = NEW("TextBox")
-                local B_Fill = NEW("Frame")
-                local Copy_Values = NEW("TextButton")
-                local HEX = NEW("Frame")
-                local HEX_Value = NEW("TextBox")
-                local HEX_Fill = NEW("Frame")
-
-                Picker.Name="Picker"Picker.Parent=Picker_Windows;Picker.BackgroundColor3=window.WinTheme.Background;Picker.BorderColor3=window.WinTheme.Dark_Borders;Picker.Position=U2(0.150000006,0,0.5,0)Picker.Size=U2(0,250,0,16)Picker.ZIndex=lastCPZIndex+10;Picker.Visible=false;Picker.Active=true;Picker.Draggable=true;Picker_Title.Name="Picker_Title"Picker_Title.Parent=Picker;Picker_Title.BackgroundColor3=RGB(255,255,255)Picker_Title.BackgroundTransparency=1.000;Picker_Title.Position=U2(0,5,0,0)Picker_Title.Size=U2(0,1,1,0)Picker_Title.ZIndex=lastCPZIndex+11;Picker_Title.Font=GTHM;Picker_Title.Text="Color: "..(Page_Option.Text or"Page").."/"..(info.Text or"Color")Picker_Title.TextColor3=window.WinTheme.Text_Color;Picker_Title.TextSize=window.WinTheme.Text_Size_Medium;Picker_Title.TextXAlignment=TXAL;Picker_Close.Name="Picker_Close"Picker_Close.Parent=Picker;Picker_Close.BackgroundTransparency=1;Picker_Close.BackgroundColor3=window.WinTheme.Background;Picker_Close.BorderColor3=window.WinTheme.Accent;Picker_Close.BorderSizePixel=1;Picker_Close.Position=U2(1,-16,0,0)Picker_Close.Size=U2(0,16,0,16)Picker_Close.ZIndex=lastCPZIndex+12;Picker_Close.AutoButtonColor=false;Picker_Close.Image="rbxassetid://7248316188"Picker_Close_Left.Name="Picker_Close_Left"Picker_Close_Left.Parent=Picker_Close;Picker_Close_Left.BackgroundColor3=window.WinTheme.Background;Picker_Close_Left.BorderSizePixel=0;Picker_Close_Left.Size=U2(0,4,1,0)Picker_Close_Left.ZIndex=lastCPZIndex+12;Picker_Close_Right.Name="Picker_Close_Right"Picker_Close_Right.Parent=Picker_Close;Picker_Close_Right.BackgroundColor3=window.WinTheme.Background;Picker_Close_Right.BorderSizePixel=0;Picker_Close_Right.Position=U2(1,-4,0,0)Picker_Close_Right.Size=U2(0,4,1,0)Picker_Close_Right.ZIndex=lastCPZIndex+12;Picker_Main.Name="Picker_Main"Picker_Main.Parent=Picker;Picker_Main.BackgroundColor3=window.WinTheme.Background;Picker_Main.BorderColor3=window.WinTheme.Dark_Borders;Picker_Main.Position=U2(0,0,0,17)Picker_Main.Size=U2(1,0,0,134)Picker_Main.ZIndex=lastCPZIndex+11;HSVBox.Name="HSVBox"HSVBox.Parent=Picker_Main;HSVBox.BackgroundColor3=RGB(255,0,4)HSVBox.BorderColor3=RGB(0,0,0)HSVBox.Position=U2(0,8,0,8)HSVBox.Size=U2(0,118,1,-16)HSVBox.ZIndex=lastCPZIndex+12;HSVBox.AutoButtonColor=false;HSVBox.Image="rbxassetid://4155801252"Cursor.Name="Cursor"Cursor.Parent=HSVBox;Cursor.BackgroundColor3=RGB(255,255,255)Cursor.BorderColor3=RGB(0,0,0)Cursor.Size=U2(0,1,0,1)Cursor.ZIndex=lastCPZIndex+12;HUEPicker.Name="HUEPicker"HUEPicker.Parent=Picker_Main;HUEPicker.BackgroundColor3=RGB(255,255,255)HUEPicker.BorderColor3=RGB(0,0,0)HUEPicker.Position=U2(0,131,0,8)HUEPicker.Size=U2(0,10,1,-16)HUEPicker.ZIndex=lastCPZIndex+12;HUEPicker.AutoButtonColor=false;Indicator.Name="Indicator"Indicator.Parent=HUEPicker;Indicator.BackgroundColor3=RGB(0,0,0)Indicator.BorderColor3=window.WinTheme.Light_Borders;Indicator.Size=U2(1,0,0,2)Indicator.ZIndex=lastCPZIndex+12;HUEGradient.Color=COLOR_SEQUENCE{COLOR_KEYPOINT(0.00,RGB(255,0,4)),COLOR_KEYPOINT(0.10,RGB(255,0,200)),COLOR_KEYPOINT(0.20,RGB(153,0,255)),COLOR_KEYPOINT(0.30,RGB(0,0,255)),COLOR_KEYPOINT(0.40,RGB(0,149,255)),COLOR_KEYPOINT(0.50,RGB(0,255,209)),COLOR_KEYPOINT(0.60,RGB(0,255,55)),COLOR_KEYPOINT(0.70,RGB(98,255,0)),COLOR_KEYPOINT(0.80,RGB(251,255,0)),COLOR_KEYPOINT(0.90,RGB(255,106,0)),COLOR_KEYPOINT(1.00,RGB(255,0,0))}HUEGradient.Rotation=90;HUEGradient.Name="HUEGradient"HUEGradient.Parent=HUEPicker                
-                
-                window.NewThemeUpdater({Picker, Picker_Title, Picker_Close, Picker_Close_Left, Picker_Close_Right, Picker_Main, Indicator}, function()
-                    Picker.BackgroundColor3=window.WinTheme.Background;Picker.BorderColor3=window.WinTheme.Dark_Borders;Picker_Title.TextColor3=window.WinTheme.Text_Color;Picker_Title.TextSize=window.WinTheme.Text_Size_Medium;Picker_Close.BackgroundColor3=window.WinTheme.Background;Picker_Close.BorderColor3=window.WinTheme.Accent;Picker_Close_Left.BackgroundColor3=window.WinTheme.Background;Picker_Close_Right.BackgroundColor3=window.WinTheme.Background;Picker_Main.BackgroundColor3=window.WinTheme.Background;Picker_Main.BorderColor3=window.WinTheme.Dark_Borders;Indicator.BorderColor3=window.WinTheme.Light_Borders;
-                end)
-
-                --
-
-                R_Box.Name="R_Box"R_Box.Parent=Picker_Main;R_Box.BackgroundColor3=RGB(0,0,0)R_Box.BorderColor3=window.WinTheme.Light_Borders;R_Box.Position=U2(1,-95,0,8)R_Box.Size=U2(0,90,0,16)R_Box.ZIndex=lastCPZIndex+12;R_Value.Name="R_Value"R_Value.Parent=R_Box;R_Value.BackgroundColor3=RGB(255,255,255)R_Value.BackgroundTransparency=1.000;R_Value.Position=U2(0,5,0,0)R_Value.Size=U2(1,-5,1,0)R_Value.ZIndex=lastCPZIndex+12;R_Value.ClearTextOnFocus=false;R_Value.Font=GTHM;R_Value.PlaceholderColor3=RGB(178,178,178)R_Value.PlaceholderText="R"R_Value.Text="155"R_Value.TextColor3=window.WinTheme.Text_Color;R_Value.TextSize=window.WinTheme.Text_Size_Small;R_Value.TextXAlignment=TXAL;R_Fill.Name="R_Fill"R_Fill.Parent=R_Box;R_Fill.BackgroundColor3=RGB(242,239,255)R_Fill.BorderSizePixel=0;R_Fill.Position=U2(1,-6,0,0)R_Fill.Size=U2(0,6,1,0)R_Fill.ZIndex=lastCPZIndex+12                
-                
-                window.NewThemeUpdater({R_Box, R_Value}, function()
-                    R_Box.BorderColor3=window.WinTheme.Light_Borders;
-                    R_Value.TextColor3=window.WinTheme.Text_Color;
-                    R_Value.TextSize=window.WinTheme.Text_Size_Small;
-                end)
-
-                do -- R_Box VALUE
-                    R_Box.MouseEnter:Connect(function()
-                        R_Box.BorderColor3 = window.WinTheme.Accent;
-                        R_Value.TextColor3 = window.WinTheme.Accent;
-
-                        window.InfoMessage("Red setting format: 0-255")
-                    end)
-                
-                    R_Box.MouseLeave:Connect(function()
-                        window.ResetMessage()
-
-                        R_Box.BorderColor3 = window.WinTheme.Light_Borders;
-                        R_Value.TextColor3 = window.WinTheme.Text_Color;
-                    end)
-                end
-
-                G_Box.Name="G_Box"G_Box.Parent=Picker_Main;G_Box.BackgroundColor3=RGB(0,0,0)G_Box.BorderColor3=window.WinTheme.Light_Borders;G_Box.Position=U2(1,-95,0,32)G_Box.Size=U2(0,90,0,16)G_Box.ZIndex=lastCPZIndex+12;G_Value.Name="G_Value"G_Value.Parent=G_Box;G_Value.BackgroundColor3=RGB(255,255,255)G_Value.BackgroundTransparency=1.000;G_Value.Position=U2(0,5,0,0)G_Value.Size=U2(1,-5,1,0)G_Value.ZIndex=lastCPZIndex+12;G_Value.ClearTextOnFocus=false;G_Value.Font=GTHM;G_Value.PlaceholderText="G"G_Value.Text="155"G_Value.TextColor3=window.WinTheme.Text_Color;G_Value.TextSize=window.WinTheme.Text_Size_Small;G_Value.TextXAlignment=TXAL;G_Fill.Name="G_Fill"G_Fill.Parent=G_Box;G_Fill.BackgroundColor3=RGB(242,239,255)G_Fill.BorderSizePixel=0;G_Fill.Position=U2(1,-6,0,0)G_Fill.Size=U2(0,6,1,0)G_Fill.ZIndex=lastCPZIndex+12
-                
-                window.NewThemeUpdater({G_Box, G_Value}, function()
-                    G_Box.BorderColor3 = window.WinTheme.Light_Borders;
-                    G_Value.TextColor3 = window.WinTheme.Text_Color;
-                    G_Value.TextSize = window.WinTheme.Text_Size_Small;
-                end)
-
-                do -- G_Box VALUE
-                    G_Box.MouseEnter:Connect(function()
-                        G_Box.BorderColor3 = window.WinTheme.Accent;
-                        G_Value.TextColor3 = window.WinTheme.Accent;
-
-                        window.InfoMessage("Green setting format: 0-255")
-                    end)
-                
-                    G_Box.MouseLeave:Connect(function()
-                        window.ResetMessage()
-
-                        G_Box.BorderColor3 = window.WinTheme.Light_Borders;
-                        G_Value.TextColor3 = window.WinTheme.Text_Color;
-                    end)
-                end
-
-                B_Box.Name="B_Box"B_Box.Parent=Picker_Main;B_Box.BackgroundColor3=RGB(0,0,0)B_Box.BorderColor3=window.WinTheme.Light_Borders;B_Box.Position=U2(1,-95,0,56)B_Box.Size=U2(0,90,0,16)B_Box.ZIndex=lastCPZIndex+12;B_Value.Name="B_Value"B_Value.Parent=B_Box;B_Value.BackgroundColor3=RGB(255,255,255)B_Value.BackgroundTransparency=1.000;B_Value.Position=U2(0,5,0,0)B_Value.Size=U2(1,-5,1,0)B_Value.ZIndex=lastCPZIndex+12;B_Value.ClearTextOnFocus=false;B_Value.Font=GTHM;B_Value.PlaceholderText="B"B_Value.Text="155"B_Value.TextColor3=window.WinTheme.Text_Color;B_Value.TextSize=window.WinTheme.Text_Size_Small;B_Value.TextXAlignment=TXAL;B_Fill.Name="B_Fill"B_Fill.Parent=B_Box;B_Fill.BackgroundColor3=RGB(242,239,255)B_Fill.BorderSizePixel=0;B_Fill.Position=U2(1,-6,0,0)B_Fill.Size=U2(0,6,1,0)B_Fill.ZIndex=lastCPZIndex+12
-                
-                window.NewThemeUpdater({B_Box, B_Value}, function()
-                    B_Box.BorderColor3 = window.WinTheme.Light_Borders;
-                    B_Value.TextColor3 = window.WinTheme.Text_Color;
-                    B_Value.TextSize = window.WinTheme.Text_Size_Small;
-                end)
-
-                do -- B_Box VALUE
-                    B_Box.MouseEnter:Connect(function()
-                        B_Box.BorderColor3 = window.WinTheme.Accent;
-                        B_Value.TextColor3 = window.WinTheme.Accent;
-
-                        window.InfoMessage("Blue setting format: 0-255")
-                    end)
-                
-                    B_Box.MouseLeave:Connect(function()
-                        window.ResetMessage()
-
-                        B_Box.BorderColor3 = window.WinTheme.Light_Borders;
-                        B_Value.TextColor3 = window.WinTheme.Text_Color;
-                    end)
-                end
-
-                HEX.Name="HEX"HEX.Parent=Picker_Main;HEX.BackgroundColor3=RGB(0,0,0)HEX.BorderColor3=window.WinTheme.Light_Borders;HEX.Position=U2(1,-95,0,80)HEX.Size=U2(0,90,0,16)HEX.ZIndex=lastCPZIndex+12;HEX_Value.Name="HEX_Value"HEX_Value.Parent=HEX;HEX_Value.BackgroundColor3=RGB(255,255,255)HEX_Value.BackgroundTransparency=1.000;HEX_Value.Position=U2(0,5,0,0)HEX_Value.Size=U2(1,-5,1,0)HEX_Value.ZIndex=lastCPZIndex+12;HEX_Value.ClearTextOnFocus=false;HEX_Value.Font=GTHM;HEX_Value.PlaceholderText="HEX"HEX_Value.Text="FFFFFF"HEX_Value.TextColor3=window.WinTheme.Text_Color;HEX_Value.TextSize=window.WinTheme.Text_Size_Small;HEX_Value.TextXAlignment=TXAL;HEX_Fill.Name="HEX_Fill"HEX_Fill.Parent=HEX;HEX_Fill.BackgroundColor3=RGB(242,239,255)HEX_Fill.BorderSizePixel=0;HEX_Fill.Position=U2(1,-6,0,0)HEX_Fill.Size=U2(0,6,1,0)HEX_Fill.ZIndex=lastCPZIndex+12
-                
-                window.NewThemeUpdater({HEX, HEX_Value}, function()
-                    HEX.BorderColor3 = window.WinTheme.Light_Borders;
-
-                    HEX_Value.TextColor3 = window.WinTheme.Text_Color;
-                    HEX_Value.TextSize = window.WinTheme.Text_Size_Small;
-                end)
-
-                do -- HEX VALUE
-                    HEX.MouseEnter:Connect(function()
-                        HEX.BorderColor3 = window.WinTheme.Accent;
-                        HEX_Value.TextColor3 = window.WinTheme.Accent;
-
-                        window.InfoMessage("Hexadecimal setting format: #000000")
-                    end)
-                
-                    HEX.MouseLeave:Connect(function()
-                        window.ResetMessage()
-
-                        HEX.BorderColor3 = window.WinTheme.Light_Borders;
-                        HEX_Value.TextColor3 = window.WinTheme.Text_Color;
-                    end)
-                end
-
-                Copy_Values.Name="Copy_Values"Copy_Values.Parent=Picker_Main;Copy_Values.BackgroundColor3=RGB(0,0,0)Copy_Values.BorderColor3=window.WinTheme.Light_Borders;Copy_Values.Position=U2(1,-95,0,109)Copy_Values.Size=U2(0,90,0,16)Copy_Values.ZIndex=lastCPZIndex+12;Copy_Values.AutoButtonColor=false;Copy_Values.Font=GTHM;Copy_Values.Text="Copy Values"Copy_Values.TextColor3=window.WinTheme.Text_Color;Copy_Values.TextSize=window.WinTheme.Text_Size_Small;Copy_Values.TextWrapped=true                
-                
-                window.NewThemeUpdater({Copy_Values}, function()
-                    Copy_Values.BorderColor3 = window.WinTheme.Light_Borders;
-                    Copy_Values.TextColor3 = window.WinTheme.Text_Color;
-                    Copy_Values.TextSize = window.WinTheme.Text_Size_Small;
-                end)
-                
-                do -- COPY VALUES
-                    Copy_Values.MouseButton1Click:Connect(function()
-                        if setclipboard then setclipboard(R_Value.Text..", "..G_Value.Text..", "..B_Value.Text) end
-                    end)
-    
-                    Copy_Values.MouseEnter:Connect(function()
-                        Copy_Values.BorderColor3 = window.WinTheme.Accent;
-                        Copy_Values.TextColor3 = window.WinTheme.Accent;
-
-                        window.InfoMessage("Copies RGB values to your clipboard")
-                    end)
-                
-                    Copy_Values.MouseLeave:Connect(function()
-                        window.ResetMessage()
-
-                        Copy_Values.BorderColor3 = window.WinTheme.Light_Borders;
-                        Copy_Values.TextColor3 = window.WinTheme.Text_Color;
-                    end)
-                end
-
-                lastCPZIndex = lastCPZIndex + 14
-
-                R_Value.Text = ROUND(info.Default.R*255)
-                G_Value.Text = ROUND(info.Default.G*255)
-                B_Value.Text = ROUND(info.Default.B*255)
-
-                Colorpicker_Detector.BackgroundColor3 = info.Default
-
-                local previous = nil
-
-                local function PlaceColor(col) -- RGB Color
-                    local h, s, v = ColorModule:rgbToHsv(col.r*255, col.g*255, col.b*255)
-
-                    Indicator.Position = U2(0, 0, 0, HUEPicker.AbsoluteSize.Y - HUEPicker.AbsoluteSize.Y * h)
-                    Cursor.Position = U2(0, HSVBox.AbsoluteSize.X * s, 0, HSVBox.AbsoluteSize.Y - HSVBox.AbsoluteSize.Y * v)
-
-                    HEX_Value.Text = rgbToHex(col)
-
-                    Colorpicker_Detector.BackgroundColor3 = col
-
-                    HSVBox.BackgroundColor3 = HSV(h, 1, 1)
-                    if col ~= previous then
-                        previous = col
-                        info.Callback(col)
-                    end
-                end
-
-                local function PlaceColorHSV(hsv) -- HSV Color
-                    local h = hsv.h
-                    local s = hsv.s
-                    local v = hsv.v
-                    HSVBox.BackgroundColor3 = HSV(h, 1, 1)
-                    local newh, news, newv = ColorModule:hsvToRgb(h, s, v)
-                    R_Value.Text = ROUND(newh)
-                    G_Value.Text = ROUND(news)
-                    B_Value.Text = ROUND(newv)
-                    HEX_Value.Text = rgbToHex(RGB(ROUND(newh), ROUND(news), ROUND(newv)))
-                    Colorpicker_Detector.BackgroundColor3 = RGB(ROUND(newh), ROUND(news), ROUND(newv))
-
-                    local col = RGB(newh, news, newv)
-                    if col ~= previous then
-                        previous = col
-                        info.Callback(col)
-                    end
-                end
-
-                PlaceColor(info.Default)
-
-                local SelectingHUE = false
-                local SelectingHSV = false
-                
-                local prev1
-                R_Value.Changed:Connect(function(property)
-                    if (SelectingHUE == false and SelectingHSV == false) and tostring(property) == "Text" and tonumber(R_Value.Text) then
-                        R_Value.Text = CLAMP(tonumber(R_Value.Text), 0, 255)
-                        PlaceColor(RGB(tonumber(R_Value.Text), tonumber(G_Value.Text), tonumber(B_Value.Text)))
-                        Colorpicker_Detector.BackgroundColor3 = RGB(tonumber(R_Value.Text), tonumber(G_Value.Text), tonumber(B_Value.Text))
-                        prev1 = tonumber(R_Value.Text)
-                    elseif (SelectingHUE == false and SelectingHSV == false) and tostring(property) == "Text" and R_Value.Text == " " then
-                        R_Value.Text = prev1
-                    end
-                end)
-
-                local prev2
-                G_Value.Changed:Connect(function(property)
-                    if (SelectingHUE == false and SelectingHSV == false) and tostring(property) == "Text" and tonumber(G_Value.Text) then
-                        G_Value.Text = CLAMP(tonumber(G_Value.Text), 0, 255)
-                        PlaceColor(RGB(tonumber(R_Value.Text), tonumber(G_Value.Text), tonumber(B_Value.Text)))
-                        Colorpicker_Detector.BackgroundColor3 = RGB(tonumber(R_Value.Text), tonumber(G_Value.Text), tonumber(B_Value.Text))
-                        prev2 = tonumber(G_Value.Text)
-                    elseif (SelectingHUE == false and SelectingHSV == false) and tostring(property) == "Text" and G_Value.Text == " " then
-                        G_Value.Text = prev2
-                    end
-                end)
-
-                local prev3
-                B_Value.Changed:Connect(function(property)
-                    if (SelectingHUE == false and SelectingHSV == false) and tostring(property) == "Text" and tonumber(B_Value.Text) then
-                        B_Value.Text = CLAMP(tonumber(B_Value.Text), 0, 255)
-                        PlaceColor(RGB(tonumber(R_Value.Text), tonumber(G_Value.Text), tonumber(B_Value.Text)))
-                        Colorpicker_Detector.BackgroundColor3 = RGB(tonumber(R_Value.Text), tonumber(G_Value.Text), tonumber(B_Value.Text))
-                        prev3 = tonumber(B_Value.Text)
-                    elseif (SelectingHUE == false and SelectingHSV == false) and tostring(property) == "Text" and B_Value.Text == " " then
-                        B_Value.Text = prev3
-                    end
-                end)
-
-                local prevHEX
-                HEX_Value.Changed:Connect(function(property)
-                    if (SelectingHUE == false and SelectingHSV == false) and tostring(property) == "Text" and #HEX_Value.Text == 7 then
-                        PlaceColor(hexToRGB(HEX_Value.Text))
-                    end
-                end)
-
-                HUEPicker.MouseButton1Down:Connect(function()
-                    SelectingHUE = true
-                    Indicator.BorderColor3 = window.WinTheme.Accent;
-                end)
-                HSVBox.MouseButton1Down:Connect(function()
-                    SelectingHSV = true
-                    Cursor.BorderColor3 = window.WinTheme.Accent;
-                end)
-
-                local selecting_c
-                selecting_c = UIS.InputEnded:Connect(function(input)
-                    if DESTROY_UI then
-                        selecting_c:Disconnect()
-                    elseif input.UserInputType == MB1 then
-                        SelectingHUE = false
-                        SelectingHSV = false
-
-                        Cursor.BorderColor3 = RGB(0, 0, 0)
-                        Indicator.BorderColor3 = window.WinTheme.Light_Borders;
-                    end
-                end)
-                
-                local colorpicker_c
-                colorpicker_c = function()
-                    if DESTROY_UI then
-                        RS:UnbindFromRenderStep(bindName)
-                    else
-                        if SelectingHUE then
-                            Indicator.Position = U2(0, 0, 0, CLAMP(Mouse.Y - HUEPicker.AbsolutePosition.Y, 0, HUEPicker.AbsoluteSize.Y))
-                            local h1 = (HUEPicker.AbsoluteSize.Y - (Indicator.AbsolutePosition.Y - HUEPicker.AbsolutePosition.Y)) / HUEPicker.AbsoluteSize.Y
-                            local s1 = (Cursor.AbsolutePosition.X - HSVBox.AbsolutePosition.X) / HSVBox.AbsoluteSize.X
-                            local v1 = (HSVBox.AbsoluteSize.Y - (Cursor.AbsolutePosition.Y - HSVBox.AbsolutePosition.Y)) / HSVBox.AbsoluteSize.Y
-                            PlaceColorHSV({h = h1, s = s1, v = v1})
-                        end
-                        if SelectingHSV then
-                            Cursor.Position = U2(0, CLAMP(Mouse.X - HSVBox.AbsolutePosition.X, 0, HSVBox.AbsoluteSize.X), 0, CLAMP(Mouse.Y - HSVBox.AbsolutePosition.Y, 0, HSVBox.AbsoluteSize.Y))
-                            local h1 = (HUEPicker.AbsoluteSize.Y - (Indicator.AbsolutePosition.Y - HUEPicker.AbsolutePosition.Y)) / HUEPicker.AbsoluteSize.Y
-                            local s1 = (Cursor.AbsolutePosition.X - HSVBox.AbsolutePosition.X) / HSVBox.AbsoluteSize.X
-                            local v1 = (HSVBox.AbsoluteSize.Y - (Cursor.AbsolutePosition.Y - HSVBox.AbsolutePosition.Y)) / HSVBox.AbsoluteSize.Y
-                            PlaceColorHSV({h = h1, s = s1, v = v1})
-                        end
-                    end
-                end
-
-                do -- CLOSE
-                    Picker_Close.MouseButton1Click:Connect(function()
-                        Picker.Visible = false
-                        RS:UnbindFromRenderStep(bindName)
-                    end)
-
-                    Picker_Close.MouseEnter:Connect(function()
-                        Picker_Close.BackgroundTransparency = 0
-                        Picker_Close.ImageColor3 = window.WinTheme.Accent;
-                    end)
-                
-                    Picker_Close.MouseLeave:Connect(function()
-                        Picker_Close.BackgroundTransparency = 1
-                        Picker_Close.ImageColor3 = RGB(255, 255, 255)
-                    end)
-                end
-
-                do -- CP DETECTOR
-                    Colorpicker_Detector.MouseButton1Click:Connect(function()
-                        Picker.Visible = not Picker.Visible
-
-                        if Picker.Visible then
-                            RS:BindToRenderStep(bindName, 1, colorpicker_c)
-                        else
-                            RS:UnbindFromRenderStep(bindName)
-                        end
-                    end)
-    
-                    Colorpicker_Detector.MouseEnter:Connect(function()
-                        Colorpicker_Detector.BorderColor3 = window.WinTheme.Accent;
-
-                        window.InfoMessage(info.Description or "")
-                    end)
-                
-                    Colorpicker_Detector.MouseLeave:Connect(function()
-                        window.ResetMessage()
-
-                        Colorpicker_Detector.BorderColor3 = window.WinTheme.Light_Borders;
-                    end)
-                end
-
-                updateSectionSize()
-
-                local color_picker_funcs = {}
-
-                function color_picker_funcs.SetColor(new)
-                    PlaceColor(new)
-                end
-                function color_picker_funcs.GetColor()
-                    return Colorpicker_Detector.BackgroundColor3
-                end
-
-                function color_picker_funcs.SetText(text)
-                    Colorpicker_Title.Text = text
-                end
-                function color_picker_funcs.GetText()
-                    return Colorpicker_Title.Text
-                end
-
-                function color_picker_funcs.ReplaceCallback(newfunc)
-                    info.Callback = newfunc
-                end
-
-                return color_picker_funcs
-            end 
-            
-            function section_funcs.NewChipset(info)
-                info.Callback = info.Callback or function()end
-                info.Text = info.Text or "Chipset"
-                info.Description = info.Description or ""
-
-                local Options = info.Options or {}
-
-                local Chipset = NEW("Frame")
-                local Chipset_Detector = NEW("TextButton")
-                local Chipset_Title = NEW("TextLabel")
-                local Chipset_Arrow = NEW("TextLabel")
-                local Options_Container = NEW("Frame")
-                local Options_List = NEW("UIListLayout")
-
-                Chipset.Name="Chipset"Chipset.Parent=Item_Container;Chipset.BackgroundColor3=RGB(255,255,255)Chipset.BackgroundTransparency=1.000;Chipset.BorderSizePixel=0;Chipset.Size=U2(1,0,0,16)Chipset_Detector.Name="Chipset_Detector"Chipset_Detector.Parent=Chipset;Chipset_Detector.BackgroundColor3=RGB(0,0,0)Chipset_Detector.BorderColor3=window.WinTheme.Light_Borders;Chipset_Detector.Position=U2(0,5,0,0)Chipset_Detector.Size=U2(1,-10,0,16)Chipset_Detector.AutoButtonColor=false;Chipset_Detector.Font=GTHM;Chipset_Detector.Text=""Chipset_Detector.TextColor3=window.WinTheme.Text_Color;Chipset_Detector.TextSize=window.WinTheme.Text_Size_Medium;Chipset_Detector.TextWrapped=true;Chipset_Title.Name="Chipset_Title"Chipset_Title.Parent=Chipset_Detector;Chipset_Title.BackgroundColor3=RGB(255,255,255)Chipset_Title.BackgroundTransparency=1.000;Chipset_Title.Position=U2(0,5,0,0)Chipset_Title.Size=U2(0,1,1,0)Chipset_Title.Font=GTHM;Chipset_Title.Text=info.Text or"Chipset"Chipset_Title.TextColor3=window.WinTheme.Text_Color;Chipset_Title.TextSize=window.WinTheme.Text_Size_Small;Chipset_Title.TextXAlignment=TXAL;Chipset_Arrow.Name="Chipset_Arrow"Chipset_Arrow.Parent=Chipset_Detector;Chipset_Arrow.BackgroundColor3=RGB(255,255,255)Chipset_Arrow.BackgroundTransparency=1.000;Chipset_Arrow.Position=U2(1,-15,0.5,-5)Chipset_Arrow.Size=U2(0,10,0,10)Chipset_Arrow.Font=GTHM;Chipset_Arrow.Text="v"Chipset_Arrow.TextColor3=window.WinTheme.Text_Color;Chipset_Arrow.TextSize=window.WinTheme.Text_Size_Medium;Options_Container.Name="Options_Container"Options_Container.Parent=Chipset_Detector;Options_Container.BackgroundColor3=RGB(255,255,255)Options_Container.BackgroundTransparency=1.000;Options_Container.Position=U2(0,0,1,8)Options_Container.Size=U2(1,0,1,0)Options_Container.Visible=false;Options_List.Name="Options_List"Options_List.Parent=Options_Container;Options_List.SortOrder=SOLO;Options_List.Padding=U1(0,1)
-
-                window.NewThemeUpdater({Chipset_Detector, Chipset_Title, Chipset_Arrow}, function()
-                    Chipset_Detector.BorderColor3=window.WinTheme.Light_Borders;Chipset_Detector.TextColor3=window.WinTheme.Text_Color;Chipset_Detector.TextSize=window.WinTheme.Text_Size_Medium;Chipset_Title.TextColor3=window.WinTheme.Text_Color;Chipset_Title.TextSize=window.WinTheme.Text_Size_Small;Chipset_Arrow.TextColor3=window.WinTheme.Text_Color;Chipset_Arrow.TextSize=window.WinTheme.Text_Size_Medium
-                end)
-
-                Chipset_Detector.MouseButton1Click:Connect(function()
-                    Options_Container.Visible = not Options_Container.Visible
-                    if Options_Container.Visible then
-                        Chipset_Arrow.Text = "<"
-                        Chipset_Arrow.TextSize = 12.000
-                    else
-                        Chipset_Arrow.Text = "v"
-                        Chipset_Arrow.TextSize = 11.000
-                    end
-                end)
-
-                Chipset_Detector.MouseEnter:Connect(function()
-                    Chipset_Detector.BorderColor3 = window.WinTheme.Accent;
-                    Chipset_Title.TextColor3 = window.WinTheme.Accent;
-                    Chipset_Arrow.TextColor3 = window.WinTheme.Accent;
-        
-                    window.InfoMessage(info.Description or "")
-                end)
-            
-                Chipset_Detector.MouseLeave:Connect(function()
-                    window.ResetMessage()
-        
-                    Chipset_Detector.BorderColor3 = window.WinTheme.Light_Borders;
-                    Chipset_Title.TextColor3 = window.WinTheme.Text_Color;
-                    Chipset_Arrow.TextColor3 = window.WinTheme.Text_Color;
-                end)
-
-                for i,v in pairs(info.Options) do
-                    Options[i] = v
-
-                    local Option = NEW("TextButton")
-                    local Option_Title = NEW("TextLabel")
-
-                    Option.Name="Option"Option.Parent=Options_Container;Option.BackgroundColor3=RGB(0,0,0)Option.BorderColor3=RGB(10,10,10)Option.Size=U2(1,0,0,16)Option.ZIndex=10;Option.AutoButtonColor=false;Option.Font=GTHM;Option.Text=""Option.TextColor3=RGB(0,0,0)Option.TextSize=window.WinTheme.Text_Size_Medium;Option_Title.Name="Option_Title"Option_Title.Parent=Option;Option_Title.BackgroundColor3=RGB(255,255,255)Option_Title.BackgroundTransparency=1.000;Option_Title.Position=U2(0,5,0,0)Option_Title.Size=U2(1,0,1,0)Option_Title.ZIndex=11;Option_Title.Font=GTHM;Option_Title.Text=i;Option_Title.TextColor3=window.WinTheme.Text_Color;Option_Title.TextSize=window.WinTheme.Text_Size_Small;Option_Title.TextWrapped=true;Option_Title.TextXAlignment=TXAL
-
-                    local TOGGLED = Options[i]
-                    local function UpdateColor()
-                        if TOGGLED then
-                            Option.BackgroundColor3 = window.WinTheme.Dark_Accent
-                        else
-                            Option.BackgroundColor3 = RGB(0, 0, 0)
-                        end
-                    end
-                    UpdateColor()
-
-                    window.NewThemeUpdater({Option, Option_Title}, function()
-                        Option.TextSize = window.WinTheme.Text_Size_Medium;
-                        Option_Title.TextColor3 = window.WinTheme.Text_Color;
-                        Option_Title.TextSize = window.WinTheme.Text_Size_Small;
-                        UpdateColor()
-                    end)
-
-                    local function Toggle_Option()
-                        TOGGLED = not TOGGLED
-                        Options[i] = TOGGLED
-                        UpdateColor()
-
-                        info.Callback(Options)
-                    end
-
-                    Option.MouseButton1Click:Connect(function()
-                        Toggle_Option()
-                    end)
-    
-                    Option.MouseEnter:Connect(function()
-                        Option.ZIndex = 12
-                        Option_Title.ZIndex = 13
-
-                        Option.BorderColor3 = window.WinTheme.Accent;
-                        Option_Title.TextColor3 = window.WinTheme.Accent;
-
-                        window.InfoMessage(info.Description or "")
-                    end)
-                
-                    Option.MouseLeave:Connect(function()
-                        window.ResetMessage()
-
-                        Option.ZIndex = 10
-                        Option_Title.ZIndex = 11
-
-                        Option.BorderColor3 = RGB(10, 10, 10)
-                        Option_Title.TextColor3 = window.WinTheme.Text_Color;
-                    end)
-                end
-
-                updateSectionSize()
-
-                local chipset_funcs = {}
-
-                function chipset_funcs.SetText(text)
-                    Chipset_Title.Text = text
-                end
-                function chipset_funcs.GetText()
-                    return Chipset_Title.Text
-                end
-
-                function chipset_funcs.ReplaceCallback(newfunc)
-                    info.Callback = newfunc
-                end
-
-                return chipset_funcs
-            end
-
-            function section_funcs.NewPlayerChipset(info)
-                info.Callback = info.Callback or function()end
-                info.Text = info.Text or "Player List"
-                info.Description = info.Description or ""
-
-                local Options = info.Options or {}
-
-                local Chipset = NEW("Frame")
-                local Chipset_Detector = NEW("TextButton")
-                local Chipset_Title = NEW("TextLabel")
-                local Chipset_Arrow = NEW("TextLabel")
-                local Options_Container = NEW("Frame")
-                local Options_List = NEW("UIListLayout")
-
-                Chipset.Name="Chipset"Chipset.Parent=Item_Container;Chipset.BackgroundColor3=RGB(255,255,255)Chipset.BackgroundTransparency=1.000;Chipset.BorderSizePixel=0;Chipset.Size=U2(1,0,0,16)Chipset_Detector.Name="Chipset_Detector"Chipset_Detector.Parent=Chipset;Chipset_Detector.BackgroundColor3=RGB(0,0,0)Chipset_Detector.BorderColor3=window.WinTheme.Light_Borders;Chipset_Detector.Position=U2(0,5,0,0)Chipset_Detector.Size=U2(1,-10,0,16)Chipset_Detector.AutoButtonColor=false;Chipset_Detector.Font=GTHM;Chipset_Detector.Text=""Chipset_Detector.TextColor3=window.WinTheme.Text_Color;Chipset_Detector.TextSize=window.WinTheme.Text_Size_Medium;Chipset_Detector.TextWrapped=true;Chipset_Title.Name="Chipset_Title"Chipset_Title.Parent=Chipset_Detector;Chipset_Title.BackgroundColor3=RGB(255,255,255)Chipset_Title.BackgroundTransparency=1.000;Chipset_Title.Position=U2(0,5,0,0)Chipset_Title.Size=U2(0,1,1,0)Chipset_Title.Font=GTHM;Chipset_Title.Text=info.Text or"Player List"Chipset_Title.TextColor3=window.WinTheme.Text_Color;Chipset_Title.TextSize=window.WinTheme.Text_Size_Small;Chipset_Title.TextXAlignment=TXAL;Chipset_Arrow.Name="Chipset_Arrow"Chipset_Arrow.Parent=Chipset_Detector;Chipset_Arrow.BackgroundColor3=RGB(255,255,255)Chipset_Arrow.BackgroundTransparency=1.000;Chipset_Arrow.Position=U2(1,-15,0.5,-5)Chipset_Arrow.Size=U2(0,10,0,10)Chipset_Arrow.Font=GTHM;Chipset_Arrow.Text="v"Chipset_Arrow.TextColor3=window.WinTheme.Text_Color;Chipset_Arrow.TextSize=11.000;Options_Container.Name="Options_Container"Options_Container.Parent=Chipset_Detector;Options_Container.BackgroundColor3=RGB(255,255,255)Options_Container.BackgroundTransparency=1.000;Options_Container.Position=U2(0,0,1,8)Options_Container.Size=U2(1,0,1,0)Options_Container.Visible=false;Options_List.Name="Options_List"Options_List.Parent=Options_Container;Options_List.SortOrder=SOLO;Options_List.Padding=U1(0,1)
-
-                window.NewThemeUpdater({Chipset_Detector, Chipset_Title, Chipset_Arrow}, function()
-                    Chipset_Detector.BorderColor3=window.WinTheme.Light_Borders;Chipset_Detector.TextColor3=window.WinTheme.Text_Color;Chipset_Detector.TextSize=window.WinTheme.Text_Size_Medium;Chipset_Title.TextColor3=window.WinTheme.Text_Color;Chipset_Title.TextSize=window.WinTheme.Text_Size_Small;Chipset_Arrow.TextColor3=window.WinTheme.Text_Color
-                end)
-
-                Chipset_Detector.MouseButton1Click:Connect(function()
-                    Options_Container.Visible = not Options_Container.Visible
-                    if Options_Container.Visible then
-                        Chipset_Arrow.Text = "<"
-                        Chipset_Arrow.TextSize = 12.000
-                    else
-                        Chipset_Arrow.Text = "v"
-                        Chipset_Arrow.TextSize = 11.000
-                    end
-                end)
-
-                Chipset_Detector.MouseEnter:Connect(function()
-                    Chipset_Detector.BorderColor3 = window.WinTheme.Accent;
-                    Chipset_Title.TextColor3 = window.WinTheme.Accent;
-                    Chipset_Arrow.TextColor3 = window.WinTheme.Accent;
-        
-                    window.InfoMessage(info.Description or "")
-                end)
-            
-                Chipset_Detector.MouseLeave:Connect(function()
-                    window.ResetMessage()
-        
-                    Chipset_Detector.BorderColor3 = window.WinTheme.Light_Borders;
-                    Chipset_Title.TextColor3 = window.WinTheme.Text_Color;
-                    Chipset_Arrow.TextColor3 = window.WinTheme.Text_Color;
-                end)
-
-                local player_table = {}
-
-                local function NewPlayerOption(v)
-                    local player_name = v.Name
-
-                    local Option = NEW("TextButton")
-                    local Option_Title = NEW("TextLabel")
-
-                    Option.Name="Option"Option.Parent=Options_Container;Option.BackgroundColor3=RGB(0,0,0)Option.BorderColor3=RGB(10,10,10)Option.Size=U2(1,0,0,16)Option.ZIndex=10;Option.AutoButtonColor=false;Option.Font=GTHM;Option.Text=""Option.TextColor3=RGB(0,0,0)Option.TextSize=window.WinTheme.Text_Size_Medium;Option_Title.Name="Option_Title"Option_Title.Parent=Option;Option_Title.BackgroundColor3=RGB(255,255,255)Option_Title.BackgroundTransparency=1.000;Option_Title.Position=U2(0,5,0,0)Option_Title.Size=U2(1,0,1,0)Option_Title.ZIndex=11;Option_Title.Font=GTHM;Option_Title.Text=v.Name;Option_Title.TextColor3=window.WinTheme.Text_Color;Option_Title.TextSize=window.WinTheme.Text_Size_Small;Option_Title.TextWrapped=true;Option_Title.TextXAlignment=TXAL
-
-                    local TOGGLED = false
-                    player_table[player_name] = TOGGLED
-                    local function UpdateColor()
-                        if TOGGLED then
-                            Option.BackgroundColor3 = window.WinTheme.Dark_Accent
-                        else
-                            Option.BackgroundColor3 = RGB(0, 0, 0)
-                        end
-                    end
-                    UpdateColor()
-
-                    window.NewThemeUpdater({Option, Option_Title}, function()
-                        Option.TextSize = window.WinTheme.Text_Size_Medium;
-
-                        Option_Title.TextColor3 = window.WinTheme.Text_Color;
-                        Option_Title.TextSize = window.WinTheme.Text_Size_Small;
-
-                        UpdateColor()
-                    end)
-
-                    local function Toggle_Option()
-                        TOGGLED = not TOGGLED
-                        player_table[player_name] = TOGGLED
-                        
-                        UpdateColor()
-
-                        info.Callback(player_table)
-                    end
-
-                    Option.MouseButton1Click:Connect(function()
-                        Toggle_Option()
-                    end)
-    
-                    Option.MouseEnter:Connect(function()
-                        Option.ZIndex = 12
-                        Option_Title.ZIndex = 13
-
-                        Option.BorderColor3 = window.WinTheme.Accent;
-                        Option_Title.TextColor3 = window.WinTheme.Accent;
-
-                        window.InfoMessage(info.Description or "")
-                    end)
-                
-                    Option.MouseLeave:Connect(function()
-                        window.ResetMessage()
-
-                        Option.ZIndex = 10
-                        Option_Title.ZIndex = 11
-
-                        Option.BorderColor3 = RGB(10, 10, 10)
-                        Option_Title.TextColor3 = window.WinTheme.Text_Color;
-                    end)
-
-                    local c_changed
-                    c_changed = v.AncestryChanged:connect(function()
-                        if not v:IsDescendantOf(game) then
-                            Option:Destroy()
-                        end
-                    end)
-                end
-
-                local t_players = Players:GetPlayers()
-                for i = 1, #t_players do
-                    local v = t_players[i]
-                    if v.Name ~= Player.Name then
-                        NewPlayerOption(v)
-                    end
-                end
-
-                local c_added; c_added = Players.PlayerAdded:Connect(function(v) 
-                    if DESTROY_UI then
-                        c_added:Disconnect()
-                    elseif v.Name ~= Player.Name then
-                        NewPlayerOption(v)
-                    end
-                end)
-
-                updateSectionSize()
-
-                local chipset_funcs = {}
-
-                function chipset_funcs.SetText(text)
-                    Chipset_Title.Text = text
-                end
-                function chipset_funcs.GetText()
-                    return Chipset_Title.Text
-                end
-
-                function chipset_funcs.ReplaceCallback(newfunc)
-                    info.Callback = newfunc
-                end
-
-                return chipset_funcs
-            end
-
-            return section_funcs
-        end
-        return page_funcs
-    end
-
-    return window
-end
-
-return Library
+return library
